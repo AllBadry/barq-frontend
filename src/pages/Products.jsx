@@ -7,6 +7,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
+import Seo from '../components/Seo';
 import { PLATFORMS, orderLink } from '../data/products';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -23,7 +24,10 @@ export default function Products() {
     );
     gsap.from('.pto-hero-meta', { y: 30, opacity: 0, stagger: 0.1, delay: 0.4, duration: 0.8, ease: 'power3.out' });
 
-    // كلمة المنصة العملاقة: دخول جانبي + parallax
+    // كلمة المنصة العملاقة: دخول جانبي + parallax (parallax للديسكتوب فقط)
+    const desktop = window.matchMedia('(min-width: 1024px)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     gsap.utils.toArray('.pto-word').forEach((el) => {
       gsap.from(el, {
         xPercent: 14,
@@ -32,39 +36,80 @@ export default function Products() {
         ease: 'power4.out',
         scrollTrigger: { trigger: el, start: 'top 88%', once: true },
       });
+      if (!desktop || reduce) return;
       gsap.fromTo(
         el,
         { y: -40 },
         {
           y: 40,
           ease: 'none',
+          force3D: true,
           scrollTrigger: { trigger: el.closest('section'), start: 'top bottom', end: 'bottom top', scrub: 0.6 },
         }
       );
     });
 
-    // الكروت: ظهور بستارة + طلوع متدرّج بلمسة دوران — مرة واحدة فقط لكل كرت
+    // ===== إخفاء أولي فوري قبل أول رسم (منع وميض: لا تظهر ثم تختفي ثم تعود) =====
+    // على الجوال: دخول أخف (إزاحة صغيرة + شفافية) بلا clipPath لرفع الأداء
+    const mobile = window.matchMedia('(max-width: 767px)').matches;
+
+    if (mobile) {
+      gsap.set('.pto-card', { y: 30, opacity: 0, force3D: true });
+      gsap.set('.pto-sec-head', { x: 24, opacity: 0, force3D: true });
+    } else {
+      gsap.set(
+        '.pto-card',
+        { clipPath: 'inset(0 0 100% 0)', y: 70, opacity: 0.4, rotation: (i) => (i % 2 ? -4 : 4), force3D: true }
+      );
+      gsap.set('.pto-sec-head', { x: 70, opacity: 0, rotate: 1, force3D: true });
+    }
+    gsap.set('.pto-sec-bar h3', { y: 26, opacity: 0 });
+    gsap.set('.pto-sec-bar-dot', { scale: 0, rotate: 90 });
+    gsap.set('.pto-badge', { scale: 0 });
+
+    // الكروت: تظهر عند الوصول لها بالسكرول فقط — مرة واحدة (لا تختفي ثانية أبداً)
     ScrollTrigger.batch('.pto-card', {
       start: 'top 94%',
       once: true,
       onEnter: (els) =>
-        gsap.fromTo(
-          els,
-          { clipPath: 'inset(0 0 100% 0)', y: 70, opacity: 0.4, rotation: (i) => (i % 2 ? -4 : 4) },
-          { clipPath: 'inset(0 0 0% 0)', y: 0, opacity: 1, rotation: 0, duration: 0.8, stagger: 0.1, ease: 'power4.out', overwrite: true }
-        ),
+        mobile
+          ? gsap.to(els, {
+              y: 0,
+              opacity: 1,
+              duration: 0.5,
+              stagger: 0.06,
+              ease: 'power2.out',
+              force3D: true,
+              overwrite: true,
+            })
+          : gsap.to(els, {
+              clipPath: 'inset(0 0 0% 0)',
+              y: 0,
+              opacity: 1,
+              rotation: 0,
+              duration: 0.8,
+              stagger: 0.09,
+              ease: 'power4.out',
+              force3D: true,
+              overwrite: true,
+            }),
     });
 
-    // رؤوس الأقسام (الشعار + الاسم + الدائرة): دخول جانبي متدرج
+    // رؤوس الأقسام (الشعار + الاسم + الدائرة): دخول جانبي متدرج — عند الوصول لها
     ScrollTrigger.batch('.pto-sec-head', {
       start: 'top 80%',
       once: true,
       onEnter: (els) =>
-        gsap.fromTo(
-          els,
-          { x: 70, opacity: 0, rotate: 1 },
-          { x: 0, opacity: 1, rotate: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out', overwrite: true }
-        ),
+        gsap.to(els, {
+          x: 0,
+          opacity: 1,
+          rotate: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power3.out',
+          force3D: true,
+          overwrite: true,
+        }),
     });
 
     // أشرطة القسم: مقياس من نص الكلمة + نزول العنوان
@@ -125,6 +170,11 @@ export default function Products() {
       className="relative w-full min-h-screen overflow-x-hidden bg-white text-black selection:bg-[#e4f542]"
     >
       <Navbar />
+      <Seo
+        title="المنتجات | متجر برق — متابعون ومشاهدات ولايكات لكل المنصات"
+        description="تصفح باقات متجر برق: متابعون مضمونون، مشاهدات ريلز، لايكات وتفاعل لإنستغرام وفيسبوك وتيك توك — أسعار بالدينار الأردني."
+        path="/products"
+      />
 
       {/* شريط تقدم القراءة */}
       <div className="fixed top-0 left-0 right-0 h-1.5 z-[120] bg-black/10" dir="ltr">
@@ -166,11 +216,11 @@ export default function Products() {
             PRODUCTS — المنتجات
           </span>
 
-          <h1 className="pto-hero-line mt-10 leading-[1.05] tracking-tighter text-[20vw] sm:text-[9rem] md:text-[11rem] font-black">
-            بَحْر
-          </h1>
-          <h1 className="pto-hero-line leading-[1.05] tracking-tighter text-[20vw] sm:text-[9rem] md:text-[11rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">
-            المنتجات
+          <h1 className="mt-10 leading-[1.05] tracking-tighter text-[20vw] sm:text-[9rem] md:text-[11rem] font-black">
+            <span className="pto-hero-line block">بَحْر</span>
+            <span className="pto-hero-line block text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">
+              المنتجات
+            </span>
           </h1>
 
           <p className="pto-hero-meta mt-10 text-base md:text-lg text-neutral-600 font-medium max-w-xl mx-auto leading-relaxed">

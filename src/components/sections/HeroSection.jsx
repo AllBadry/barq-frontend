@@ -44,22 +44,23 @@ export default function HeroSection() {
         scrub: 1,
       },
     })
-      .to('.hero-text-layer', { y: 140, opacity: 0.3, ease: 'none' }, 0)
-      .to('.hero-marquee', { y: -120, ease: 'none' }, 0)
-      .to('.main-character', { y: 90, ease: 'none' }, 0);
+      .to('.hero-text-layer', { y: 140, opacity: 0.3, ease: 'none', force3D: true }, 0)
+      .to('.hero-marquee', { y: -120, ease: 'none', force3D: true }, 0)
+      .to('.main-character', { y: 90, ease: 'none', force3D: true }, 0);
 
-    // تحسين أداء الأشرطة لمنع أي لاغ
+    // تحسين أداء الأشرطة لمنع أي لاغ — حركة transform على الـ GPU فقط
     const setupMarquee = (ref, direction, duration) => {
       const track = ref.current;
       if (!track) return;
       
       const singleWidth = track.scrollWidth / 2;
-      gsap.set(track, { x: 0 });
+      gsap.set(track, { x: 0, force3D: true });
 
       gsap.to(track, {
         x: direction === -1 ? `-=${singleWidth}` : `+=${singleWidth}`,
         duration: duration,
         ease: 'none',
+        force3D: true,
         repeat: -1,
         modifiers: {
           x: gsap.utils.unitize((x) => parseFloat(x) % singleWidth)
@@ -78,20 +79,19 @@ export default function HeroSection() {
     <section id="home" ref={containerRef} className="relative w-full bg-white text-black overflow-hidden overflow-x-hidden font-sans pt-24 md:pt-32 pb-16">
       
       <div className="hero-text-layer max-w-7xl mx-auto px-6 relative z-30 flex flex-col items-center">
-        <div 
+        <h1 
           dir="ltr" 
           className="flex items-center justify-center flex-wrap gap-1 sm:gap-2 md:gap-4 text-[12vw] sm:text-[10vw] md:text-[8.5rem] font-black tracking-tighter leading-none select-none uppercase"
         >
-          <span className="hero-text-part">BAR</span>
-          <div className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.png" alt="O" className="w-full h-full object-cover object-top scale-125" />
-          </div>
+          <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
+            <img src="/mann.png" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+          </span>
           <span className="hero-text-part">ST</span>
-          <div className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.png" alt="O" className="w-full h-full object-cover object-top scale-125" />
-          </div>
+          <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
+            <img src="/mann.png" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+          </span>
           <span className="hero-text-part">RE</span>
-        </div>
+        </h1>
 
         <div className="w-full flex flex-col md:flex-row items-center justify-between mt-4 md:mt-8 px-4 md:px-12 relative">
           <span className="hero-text-part text-2xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase" dir="ltr">
@@ -111,7 +111,7 @@ export default function HeroSection() {
         <div className="hero-marquee absolute top-[68%] sm:top-[60%] md:top-[58%] -translate-y-1/2 left-[-7%] right-[-7%] h-[200px] sm:h-[250px] md:h-[300px] bg-[#111] rotate-[-3deg] overflow-hidden flex flex-col justify-center gap-4 z-10 border-y-4 border-black shadow-2xl">
           
           <div dir="ltr" className="flex w-max will-change-transform">
-            <div ref={marquee1} className="flex gap-10 md:gap-14 whitespace-nowrap">
+            <div ref={marquee1} className="flex gap-10 md:gap-14 whitespace-nowrap will-change-transform">
               {[...Array(12)].map((_, i) => {
                 const bg = ['#407BFF', '#e4f542', '#FF3BFF', '#111111', '#0ea5e9', '#8b5cf6'][i % 6];
                 const fg = bg === '#e4f542' ? '#000' : '#fff';
@@ -126,7 +126,7 @@ export default function HeroSection() {
           </div>
 
           <div dir="ltr" className="flex w-max will-change-transform -translate-x-20">
-            <div ref={marquee2} className="flex gap-10 md:gap-14 whitespace-nowrap">
+            <div ref={marquee2} className="flex gap-10 md:gap-14 whitespace-nowrap will-change-transform">
               {[...Array(12)].map((_, i) => {
                 const bg = ['#e4f542', '#FF3BFF', '#111111', '#0ea5e9', '#8b5cf6', '#407BFF'][i % 6];
                 const fg = bg === '#e4f542' ? '#000' : '#fff';
@@ -141,7 +141,7 @@ export default function HeroSection() {
           </div>
 
           <div dir="ltr" className="flex w-max will-change-transform translate-x-10">
-            <div ref={marquee3} className="flex gap-10 md:gap-14 whitespace-nowrap">
+            <div ref={marquee3} className="flex gap-10 md:gap-14 whitespace-nowrap will-change-transform">
               {[...Array(12)].map((_, i) => {
                 const bg = ['#FF3BFF', '#111111', '#0ea5e9', '#8b5cf6', '#407BFF', '#e4f542'][i % 6];
                 const fg = bg === '#e4f542' ? '#000' : '#fff';
@@ -161,6 +161,8 @@ export default function HeroSection() {
           <img 
             src="/mann.png" 
             alt="Hero Character" 
+            loading="lazy"
+            decoding="async"
             className="w-full h-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
           />
         </div>

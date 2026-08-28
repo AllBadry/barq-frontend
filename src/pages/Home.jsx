@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
+import Seo from '../components/Seo';
 import HeroSection from '../components/sections/HeroSection';
 import Categories from '../components/sections/Categories';
 import AboutUs from '../components/sections/aboutus';
@@ -43,7 +44,12 @@ export default function Home() {
   }, { scope: mainRef });
 
   useGSAP(() => {
-    // ===== Parallax عام: كل عنصر يحمل data-parallax يتحرك بسرعة مختلفة عند السكرول =====
+    // ===== Parallax عام: عنصر ب data-parallax يتحرك عند السكرول =====
+    // يعمل على الشاشات الكبيرة فقط — على الهاتف نعطّل حركة الخلفيات لتفادي اللاغ
+    const desktop = window.matchMedia('(min-width: 1024px)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!desktop || reduce) return;
+
     gsap.utils.toArray('[data-parallax]').forEach((el) => {
       const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
       const dist = speed * 250;
@@ -53,6 +59,7 @@ export default function Home() {
         {
           y: dist,
           ease: 'none',
+          force3D: true,
           scrollTrigger: {
             trigger: el.closest('section') || el,
             start: 'top bottom',
@@ -71,7 +78,12 @@ export default function Home() {
       className="relative w-full bg-white min-h-screen overflow-x-hidden text-black selection:bg-[#e4f542]"
     >
       <Navbar />
-      
+      <Seo
+        title="متجر برق | Barq Store — نمو حساباتك بسرعة البرق"
+        description="اشتراكات ومتابعون ومشاهدات ولايكات لإنستغرام وفيسبوك وتيك توك، بتفعيل فوري وضمان كامل بدينار أردني."
+        path="/"
+      />
+
       <div className="cinematic-section">
         <HeroSection />
       </div>

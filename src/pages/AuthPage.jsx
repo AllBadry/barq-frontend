@@ -6,6 +6,7 @@ import { FaWhatsapp, FaInstagram, FaTiktok } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
+import Seo from '../components/Seo';
 
 const BLOB = 'radial-gradient(circle at center, transparent 0 58%, rgba(255,255,255,0.14) 60% 100%)';
 
@@ -103,6 +104,12 @@ export default function AuthPage() {
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
+      <Seo
+        title="دخول النظام | متجر برق — حساباتك كلها بضغطة"
+        description="سجّل دخولك أو أنشئ حساباً جديداً في متجر برق لمتابعة طلباتك وأكوادك على إنستغرام وفيسبوك وتيك توك."
+        path="/auth"
+        noindex
+      />
 
       <div className="relative max-w-7xl mx-auto px-6 py-14 md:py-20">
         {/* شبكة خلفية */}
@@ -122,9 +129,9 @@ export default function AuthPage() {
                   <Zap className="w-8 h-8 md:w-9 md:h-9 text-[#e4f542] fill-current" />
                 </span>
                 <div>
-                  <h2 className="font-black text-2xl md:text-3xl tracking-tighter lowercase" dir="ltr">
+                  <p className="font-black text-2xl md:text-3xl tracking-tighter lowercase" dir="ltr">
                     BARQ<span className="text-[#e4f542]"> STORE</span>
-                  </h2>
+                  </p>
                   <p className="text-[10px] font-mono font-black tracking-[0.35em] uppercase text-white/50 mt-1">
                     Growth · Followers · Fire
                   </p>
@@ -215,7 +222,7 @@ export default function AuthPage() {
               </div>
 
               {/* العنوان المتغير */}
-              <h3 ref={headingRef} className="mt-9 text-4xl md:text-5xl font-black tracking-tighter leading-none">
+              <h2 ref={headingRef} className="mt-9 text-4xl md:text-5xl font-black tracking-tighter leading-none">
                 {isLogin ? (
                   <>
                     أهلًا بعودتك
@@ -227,7 +234,7 @@ export default function AuthPage() {
                     <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FF3BFF] to-[#e4f542]">إنشاء حساب جديد</span>
                   </>
                 )}
-              </h3>
+              </h2>
               <p className="mt-3 text-sm font-bold text-neutral-500">
                 {isLogin ? 'سجّل دخولك للمتابعة من حيث توقفت.' : 'دقيقة واحدة وتبدأ التوفير والتتبع.'}
               </p>

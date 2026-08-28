@@ -1,0 +1,54 @@
+name: Deploy Barq Store to GitHub Pages
+
+# الروبوت سيعمل فقط عند رفع كود جديد على الفرع main
+# (نتخطّى رسائل الرفع التي يكتبها الروبوت نفسه لمنع التكرار اللانهائي)
+on:
+  push:
+    branches:
+      - main
+
+# إعطاء صلاحية للروبوت للكتابة ورفع الملفات على نفس الفرع
+permissions:
+  contents: write
+
+# لا نترك أكثر من تشغيل واحد في نفس الوقت على نفس الفرع
+concurrency:
+  group: main
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # نمنع الحلقة: لا نقوم بالبناء والنشر عندما يكون آخر كمت/دفع هو رفع الروبوت نفسه
+    if: ${{ !startsWith(github.event.head_commit.message, 'deploy: ') }}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies 📦
+        run: npm install
+
+      - name: Build Project 🏗
+        run: |
+          npm run build
+          node scripts/prepare-ghpages.mjs
+
+      - name: Publish Site into main (docs/) ⚡
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf docs
+          mkdir -p docs
+          cp -r dist/. docs/
+          git add docs
+          if git diff --cached --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "deploy: publish built site to docs"
+            git push origin main
+          fi

@@ -2,11 +2,13 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { Link } from 'react-router-dom';
 import { Send, MessageCircle, Mail, ArrowDown, Check, Plus, Zap, ArrowUpRight } from 'lucide-react';
 import { FaWhatsapp, FaTelegramPlane, FaInstagram } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
+import Seo from '../components/Seo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +29,7 @@ const CHANNELS = [
     value: '@barqstore',
     dir: 'ltr',
     note: 'دعم مباشر وقنوات التحديثات',
-    href: '#',
+    href: '#contact-form',
     bg: '#229ED9',
     tag: 'DIRECT',
   },
@@ -37,7 +39,7 @@ const CHANNELS = [
     value: '@barq.store',
     dir: 'ltr',
     note: 'أحدث الباقات والعروض',
-    href: '#',
+    href: '/products',
     bg: '#FF3BFF',
     tag: 'UPDATES',
   },
@@ -152,6 +154,11 @@ export default function ContactPage() {
       className="relative w-full min-h-screen overflow-x-hidden bg-white text-black selection:bg-[#e4f542]"
     >
       <Navbar />
+      <Seo
+        title="تواصل معنا | متجر برق — اطلب باقتك الآن"
+        description="تواصل مع فريق متجر برق عبر واتساب أو النموذج المباشر — متابعون ومشاهدات ولايكات لإنستغرام وفيسبوك وتيك توك."
+        path="/contact"
+      />
 
       {/* ============ HERO ============ */}
       <section className="relative bg-white overflow-hidden pt-28 md:pt-36 pb-12">
@@ -268,6 +275,7 @@ export default function ContactPage() {
             {/* نموذج الاستعلام */}
             <div className="lg:col-span-7">
               <form
+                id="contact-form"
                 onSubmit={handleSubmit}
                 className="ct-form relative bg-white border-2 border-black rounded-3xl p-8 sm:p-10 shadow-[10px_10px_0px_#000] overflow-hidden"
               >
@@ -415,9 +423,9 @@ export default function ContactPage() {
           </a>
 
           <div className="mt-10 flex items-center justify-center gap-8 font-bold text-sm text-neutral-700">
-            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="hover:text-[#FF3BFF] underline underline-offset-4 transition-colors">إنستغرام</a>
+            <Link to="/products#platform-instagram" className="hover:text-[#FF3BFF] underline underline-offset-4 transition-colors">إنستغرام</Link>
             <a href="https://www.facebook.com/BarqStore11/" target="_blank" rel="noreferrer" className="hover:text-[#407BFF] underline underline-offset-4 transition-colors">فيسبوك</a>
-            <a href="#" className="hover:text-black underline underline-offset-4 transition-colors">تيك توك</a>
+            <Link to="/products#platform-tiktok" className="hover:text-black underline underline-offset-4 transition-colors">تيك توك</Link>
           </div>
         </div>
       </section>

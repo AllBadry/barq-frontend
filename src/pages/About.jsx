@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
+import Seo from '../components/Seo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -63,6 +64,11 @@ export default function About() {
       className="relative w-full min-h-screen overflow-x-hidden bg-white text-black font-sans selection:bg-[#e4f542]"
     >
       <Navbar />
+      <Seo
+        title="من نحن | متجر برق — نبيعُ حضورك الرقمي"
+        description="برق متجر نموّ قنواتك على إنستغرام وفيسبوك وتيك توك — مشاهدات ولايكات ومتابعون بتفعيل فوري وأداء يليق باسمنا."
+        path="/about"
+      />
 
       {/* ============ HERO + لائحة تفاعلية ============ */}
       <section className="relative bg-white overflow-hidden pt-28 md:pt-36 pb-16 md:pb-24">
@@ -109,6 +115,8 @@ export default function About() {
                 <img
                   src="/mann.png"
                   alt="شخصية برق"
+                  loading="lazy"
+                  decoding="async"
                   className="about-portrait-img w-full h-auto object-cover will-change-transform scale-105"
                   dir="ltr"
                 />

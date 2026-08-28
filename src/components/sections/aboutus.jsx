@@ -96,12 +96,12 @@ const CARDS = [
 ];
 
 const FLOATERS = [
-  { kind: 'cube', color: '#407BFF', size: 46, speed: '16s', pos: 'top-[16%] right-[10%]', drift: 'drift-a' },
+  { kind: 'cube', color: '#407BFF', size: 46, speed: '16s', pos: 'top-[16%] right-[10%]', drift: 'drift-a', hide: true },
   { kind: 'orb', color: '#FF3BFF', size: 30, speed: '5s', pos: 'top-[20%] left-[9%]', drift: 'drift-b' },
   { kind: 'cube', color: '#e4f542', size: 32, speed: '12s', pos: 'bottom-[20%] right-[16%]', drift: 'drift-b' },
   { kind: 'orb', color: '#0ea5e9', size: 22, speed: '7s', pos: 'bottom-[14%] left-[14%]', drift: 'drift-c' },
-  { kind: 'cube', color: '#8b5cf6', size: 40, speed: '20s', pos: 'top-[60%] left-[3%]', drift: 'drift-a' },
-  { kind: 'orb', color: '#f97316', size: 18, speed: '4.5s', pos: 'bottom-[30%] right-[4%]', drift: 'drift-c' },
+  { kind: 'cube', color: '#8b5cf6', size: 40, speed: '20s', pos: 'top-[60%] left-[3%]', drift: 'drift-a', hide: true },
+  { kind: 'orb', color: '#f97316', size: 18, speed: '4.5s', pos: 'bottom-[30%] right-[4%]', drift: 'drift-c', hide: true },
 ];
 
 function Cube3D({ size = 44, color = '#407BFF', speed = '14s' }) {
@@ -245,18 +245,6 @@ export default function AboutUs() {
         }
       );
     });
-
-    gsap.utils.toArray('.breath-blob').forEach((el, i) => {
-      gsap.to(el, {
-        x: i % 2 === 0 ? 40 : -40,
-        y: i % 2 === 0 ? -30 : 30,
-        scale: i % 2 === 0 ? 1.12 : 0.9,
-        duration: 6 + i,
-        ease: 'sine.inOut',
-        yoyo: true,
-        repeat: -1,
-      });
-    });
   }, { scope: containerRef });
 
   return (
@@ -268,29 +256,56 @@ export default function AboutUs() {
       <div className="absolute inset-0 pointer-events-none" data-parallax="-0.2">
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46rem] h-[46rem] rounded-full border-2 border-dashed border-black/[0.07] orbit-spin" style={{ ['--r']: '60s' }}></span>
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] rounded-full border border-black/[0.06] orbit-spin-rev" style={{ ['--r']: '80s' }}></span>
-        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full orbit-spin" style={{ ['--r']: '18s', background: 'conic-gradient(from 0deg, transparent 0deg, rgba(64,123,255,0.12) 80deg, transparent 170deg)' }}></span>
+        {/* حلقة دوّارة خفيفة (SVG) بدل conic-gradient — تركيب GPU بلا إعادة رسم */}
+        <svg
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 orbit-spin overflow-visible"
+          viewBox="0 0 384 384"
+          style={{ ['--r']: '18s' }}
+          aria-hidden="true"
+        >
+          <circle
+            cx="192"
+            cy="192"
+            r="176"
+            fill="none"
+            stroke="#407BFF"
+            strokeOpacity="0.14"
+            strokeWidth="16"
+            strokeDasharray="90 30"
+            strokeLinecap="round"
+          />
+        </svg>
       </div>
 
       {/* ============ مجسمات طافية ============ */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ perspective: '600px' }} data-parallax="0.55">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ perspective: '1000px' }} data-parallax="0.55">
         {FLOATERS.map((f, i) => (
-          <span key={i} className={`absolute ${f.pos} ${f.drift}`}>
+          <span key={i} className={`absolute ${f.pos} ${f.drift} ${f.hide ? 'hidden md:block' : ''}`}>
             {f.kind === 'cube' ? <Cube3D size={f.size} color={f.color} speed={f.speed} /> : <Orb size={f.size} color={f.color} speed={f.speed} />}
           </span>
         ))}
       </div>
 
-      {/* ============ غيوم لونية ============ */}
+      {/* ============ غيوم لونية (أنيميشن CSS صرف + ضبابية مخفَّفة على الجوال) ============ */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true" data-parallax="0.4">
-        <div className="breath-blob absolute -top-24 right-[-10%] w-[36rem] h-[36rem] bg-[#407BFF]/8 rounded-full blur-[140px]"></div>
-        <div className="breath-blob absolute bottom-[-20%] left-[-12%] w-[38rem] h-[38rem] bg-[#FF3BFF]/6 rounded-full blur-[150px]"></div>
-        <div className="breath-blob absolute top-[45%] left-[35%] w-80 h-80 bg-[#e4f542]/10 rounded-full blur-[110px]"></div>
+        <div
+          className="blob-breath absolute -top-24 right-[-10%] w-[20rem] md:w-[36rem] h-[20rem] md:h-[36rem] bg-[#407BFF]/8 rounded-full reduce-blur"
+          style={{ ['--bx']: '6vw', ['--by']: '-30px', ['--bs']: '1.12', ['--bb']: '11s' }}
+        ></div>
+        <div
+          className="blob-breath absolute bottom-[-20%] left-[-12%] w-[22rem] md:w-[38rem] h-[22rem] md:h-[38rem] bg-[#FF3BFF]/6 rounded-full reduce-blur"
+          style={{ ['--bx']: '-6vw', ['--by']: '30px', ['--bs']: '0.9', ['--bb']: '13s' }}
+        ></div>
+        <div
+          className="blob-breath absolute top-[45%] left-[35%] w-56 md:w-80 h-56 md:h-80 bg-[#e4f542]/10 rounded-full reduce-blur"
+          style={{ ['--bx']: '3vw', ['--by']: '-22px', ['--bs']: '1.08', ['--bb']: '9s' }}
+        ></div>
       </div>
 
       {/* ============ 1) المقدمة المثبتة ============ */}
       <div ref={introRef} className="relative min-h-screen w-full flex items-center justify-center">
-        <div className="max-w-6xl mx-auto px-6 w-full relative z-10 pt-28 pb-28">
-          <div className="flex items-center gap-3 mb-8">
+        <div className="max-w-6xl mx-auto px-6 w-full relative z-10 py-24 md:py-28">
+          <div className="flex items-center gap-3 mb-7 md:mb-8">
             <span className="inline-flex items-center gap-2 px-5 py-2 bg-[#e4f542] text-black text-xs font-black uppercase tracking-[0.35em] border-2 border-black shadow-[3px_3px_0px_#000]">
               <Sparkles className="w-3.5 h-3.5" />
               <span>متجرنا الرقمي</span>
@@ -300,7 +315,7 @@ export default function AboutUs() {
             </span>
           </div>
 
-          <h2 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.2] flex flex-wrap items-end gap-x-4 gap-y-3 pb-4">
+          <h2 className="text-4xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.18] flex flex-wrap items-end gap-x-4 gap-y-3 pb-4">
             {WORDS.map((w, i) => (
               <span
                 key={i}
@@ -315,13 +330,13 @@ export default function AboutUs() {
             ))}
           </h2>
 
-          <p className="about-statement text-neutral-600 text-base sm:text-lg font-medium leading-relaxed max-w-3xl mt-8">
+          <p className="about-statement text-neutral-600 text-base sm:text-lg font-medium leading-relaxed max-w-3xl mt-6 md:mt-8">
             متجر <span className="font-black">بَرْق</span> متخصص في بيع <span className="font-black">المنتجات الرقمية</span> و
             <span className="font-black">اشتراكات النمو</span> لأشهر المنصات: متابعون مضمونون، مشاهدات ريلز، لايكات وتفاعل —
             تُسلَّم خلال دقائق وتعمل فوراً على إنستغرام وفيسبوك وتيك توك.
           </p>
 
-          <div className="about-stats grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12 pt-8 border-t-2 border-black">
+          <div className="about-stats grid grid-cols-2 lg:grid-cols-4 gap-6 mt-10 md:mt-12 pt-8 border-t-2 border-black">
             {STATS.map((s, i) => (
               <div key={i} className="group relative">
                 <span className="absolute -top-2 -right-2 w-3 h-3 border-t-2 border-r-2 border-black opacity-30 group-hover:opacity-100 transition-opacity"></span>
@@ -337,7 +352,7 @@ export default function AboutUs() {
             ))}
           </div>
 
-          <div className="about-cta mt-10 flex flex-wrap items-center gap-4">
+          <div className="about-cta mt-8 md:mt-10 flex flex-wrap items-center gap-4">
             <Link
               to="/products"
               className="inline-flex items-center gap-3 bg-black text-white text-sm font-black uppercase tracking-wider px-7 py-4 border-2 border-black shadow-[5px_5px_0px_#000] hover:bg-[#e4f542] hover:text-black hover:shadow-[5px_5px_0px_#407BFF] transition-all duration-200"
@@ -387,7 +402,7 @@ export default function AboutUs() {
               <Package className="w-3 h-3" />
               كتالوج سريع
             </span>
-            <h3 className="text-4xl md:text-6xl font-black tracking-tight mt-5">إيه اللي بنبيعة من منّا؟</h3>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-5">إيه اللي بنبيعة من منّا؟</h2>
             <p className="mt-3 text-neutral-500 font-medium max-w-xl">كلها منتجات رقمية جاهزة تُفعّل فوراً — اختر ما يناسبك من هنا أو تكلّم معنا مباشرة.</p>
           </div>
           <Link

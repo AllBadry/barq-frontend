@@ -203,3 +203,67 @@ section::-webkit-scrollbar,
 .group:hover .tile-glyph {
   transform: rotate(45deg) scale(1.3);
 }
+
+/* ===== تحسينات أداء عامة: كل حركة transform تُركَّب على الـ GPU ===== */
+.orbit-spin,
+.orbit-spin-rev,
+.shape-spin,
+.shape-spin-rev,
+.t-marquee,
+.drifty,
+.drift-a,
+.drift-b,
+.drift-c,
+.eq-bar,
+.cube3d,
+.orb3d,
+.blob-breath {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* ===== غيوم لونية تتنفس — أنيميشن CSS صرف (بدل تويين JS متواصل) ===== */
+@keyframes blobBreath {
+  0%, 100% {
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  50% {
+    transform: translateX(var(--bx, 0px)) translateY(var(--by, 0px)) scale(var(--bs, 1.1));
+  }
+}
+
+.blob-breath {
+  animation: blobBreath var(--bb, 8s) ease-in-out infinite;
+  will-change: transform;
+}
+
+/* منع أي ضبابية ثقيلة على الشاشات الصغيرة */
+.reduce-blur {
+  filter: blur(60px);
+}
+
+@media (min-width: 768px) {
+  .reduce-blur {
+    filter: blur(140px);
+  }
+}
+
+/* منخفضو الحركة: نخفف الحومات المتواصلة */
+@media (prefers-reduced-motion: reduce) {
+  .orbit-spin,
+  .orbit-spin-rev,
+  .shape-spin,
+  .shape-spin-rev,
+  .t-marquee,
+  .drifty,
+  .drift-a,
+  .drift-b,
+  .drift-c,
+  .blob-breath,
+  .cube3d,
+  .orb3d {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { Link } from 'react-router-dom';
 import { FaInstagram, FaTiktok, FaFacebookF } from 'react-icons/fa';
 import { Sparkles, ShoppingCart, ArrowUpRight, Star } from 'lucide-react';
 
@@ -178,6 +179,7 @@ export default function Categories() {
           <Sparkles className="w-4 h-4" />
           <span>الفئات المميزة</span>
         </div>
+        <h2 className="sr-only">فئات باقات النمو لمنصات إنستغرام وفيسبوك وتيك توك</h2>
 
         <div className="mt-10 space-y-1 select-none">
           <div className="giant-word text-[14vw] sm:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85] uppercase" style={{ color: C.pink }}>
@@ -247,10 +249,10 @@ export default function Categories() {
               </div>
             </div>
 
-            <button className="relative z-10 inline-flex items-center gap-2 w-full justify-center px-6 py-3.5 rounded-2xl text-white font-black text-sm uppercase tracking-widest border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] transition-all duration-200 cursor-pointer" style={{ background: C.pink }}>
+            <Link to="/products#platform-instagram" className="relative z-10 inline-flex items-center gap-2 w-full justify-center px-6 py-3.5 rounded-2xl text-white font-black text-sm uppercase tracking-widest border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] transition-all duration-200" style={{ background: C.pink }}>
               <ArrowUpRight className="w-4 h-4" />
               استعرض التشكيلة
-            </button>
+            </Link>
           </div>
 
           {/* عروض إنستغرام */}
@@ -347,10 +349,10 @@ export default function Categories() {
             </div>
           ))}
 
-          <button className="mt-8 w-full md:w-auto mx-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-white border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200 cursor-pointer" style={{ background: C.blue }}>
+          <Link to="/products#platform-facebook" className="mt-8 w-full md:w-auto mx-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-white border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200" style={{ background: C.blue }}>
             <ArrowUpRight className="w-5 h-5" />
             تصفح فئة فيسبوك
-          </button>
+          </Link>
           </div>
         </div>
       </div>
@@ -406,21 +408,21 @@ export default function Categories() {
         <p className="text-center text-sm text-neutral-600 font-medium mt-12 max-w-lg mx-auto leading-relaxed">
           الكروت المائلة تمنحك إحساس الحركة.. والوسطى هي الأقوى اقتحاماً.
         </p>
-        <button className="mt-8 w-full md:w-auto mx-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-black bg-[#e4f542] border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200 cursor-pointer">
+        <Link to="/products#platform-tiktok" className="mt-8 w-full md:w-auto mx-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-black bg-[#e4f542] border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200">
           <ArrowUpRight className="w-5 h-5" />
           تصفح فئة تيك توك
-        </button>
+        </Link>
       </div>
 
       {/* ===== ختام القسم ===== */}
       <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
-        <h3 className="text-4xl md:text-6xl font-black tracking-tighter">
+        <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
           جاهز <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">للارتقاء؟</span>
-        </h3>
-        <button className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 rounded-full font-black text-sm uppercase tracking-widest bg-[#e4f542] text-black border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200 cursor-pointer">
+        </h2>
+        <Link to="/products" className="mt-8 inline-flex items-center gap-2.5 px-9 py-4 rounded-full font-black text-sm uppercase tracking-widest bg-[#e4f542] text-black border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[3px_3px_0px_#000] transition-all duration-200">
           <ArrowUpRight className="w-5 h-5" />
           ابدأ طلبك الآن
-        </button>
+        </Link>
       </div>
 
     </section>

@@ -2,24 +2,37 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { Link } from 'react-router-dom';
 import { Zap, ArrowUp, ArrowUpRight, Mail, Clock } from 'lucide-react';
 import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const NAV_LINKS = ['الرئيسية', 'السوشال ميديا', 'الأصول البرمجية', 'الاشتراكات'];
+const NAV_LINKS = [
+  { label: 'الرئيسية', to: '/' },
+  { label: 'المنتجات', to: '/products' },
+  { label: 'من نحن', to: '/about' },
+  { label: 'تواصل معنا', to: '/contact' },
+  { label: 'دخول النظام', to: '/auth' },
+];
 
 const PLATFORMS = [
-  { icon: FaInstagram, name: 'إنستغرام', bg: '#FF3BFF' },
-  { icon: FaFacebookF, name: 'فيسبوك', bg: '#407BFF', href: 'https://www.facebook.com/BarqStore11/' },
-  { icon: FaTiktok, name: 'تيك توك', bg: '#111111' },
+  { icon: FaInstagram, name: 'إنستغرام', bg: '#FF3BFF', to: '/products#platform-instagram' },
+  { icon: FaFacebookF, name: 'فيسبوك', bg: '#407BFF', to: '/products#platform-facebook' },
+  { icon: FaTiktok, name: 'تيك توك', bg: '#111111', to: '/products#platform-tiktok' },
 ];
 
 const CONTACTS = [
   { icon: FaWhatsapp, label: 'واتساب', value: '0785151865', href: 'https://wa.me/962785151865' },
-  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@barqstore', href: '#' },
+  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@barqstore', href: '/contact#contact-form' },
   { icon: Mail, label: 'البريد الإلكتروني', value: 'support@barqstore.org', href: 'mailto:support@barqstore.org' },
-  { icon: Clock, label: 'الدعم الفني', value: 'متاح 24/7 على مدار الأسبوع', href: '#' },
+  { icon: Clock, label: 'الدعم الفني', value: 'متاح 24/7 على مدار الأسبوع', href: '/contact' },
+];
+
+const SOCIALS = [
+  { icon: FaWhatsapp, href: 'https://wa.me/962785151865', label: 'واتساب' },
+  { icon: FaInstagram, href: '/products#platform-instagram', label: 'إنستغرام' },
+  { icon: FaTelegramPlane, href: '/contact', label: 'تيلغرام' },
 ];
 
 export default function Footer() {
@@ -66,39 +79,48 @@ export default function Footer() {
             </p>
           </div>
 
-          <button className="relative z-10 shrink-0 inline-flex items-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-9 py-5 border-2 border-black shadow-[6px_6px_0px_#e4f542] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[4px_4px_0px_#e4f542] transition-all duration-200 cursor-pointer">
+          <Link to="/products" className="relative z-10 shrink-0 inline-flex items-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-9 py-5 border-2 border-black shadow-[6px_6px_0px_#e4f542] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[4px_4px_0px_#e4f542] transition-all duration-200">
             <ArrowUpRight className="w-5 h-5" />
             ابدأ طلبك الآن
-          </button>
+          </Link>
         </div>
 
         {/* ===== الأعمدة الرئيسية ===== */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 pt-16 md:pt-20">
           {/* العلامة */}
           <div className="footer-col">
-            <div className="flex items-center gap-3 select-none group" dir="ltr">
+            <Link to="/" className="flex items-center gap-3 select-none group" dir="ltr">
               <div className="w-11 h-11 bg-black text-white border-2 border-black flex items-center justify-center group-hover:bg-[#407BFF] transition-colors">
                 <Zap className="w-6 h-6 fill-current" />
               </div>
               <span className="font-black text-2xl tracking-tighter uppercase">
                 BARQ<span className="text-[#407BFF]"> STORE</span>
               </span>
-            </div>
+            </Link>
             <p className="text-sm text-neutral-500 font-medium leading-relaxed mt-6">
               منصة هندسية متكاملة لتعزيز حضورك على منصات التواصل الاجتماعي بسرعة البرق وتأثير
               يليق بعلامتك.
             </p>
             <div className="flex items-center gap-3 mt-7">
-              {[FaWhatsapp, FaTelegramPlane, FaInstagram].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-11 h-11 bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-200"
-                  aria-label="social"
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+              {SOCIALS.map((s, i) => {
+                const Icon = s.icon;
+                const inner = (
+                  <>
+                    <span className="absolute inset-0 border-2 border-black"></span>
+                    <Icon className="w-4 h-4 relative" />
+                  </>
+                );
+                const cls = 'relative w-11 h-11 bg-white flex items-center justify-center hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-200';
+                return s.href.startsWith('/') ? (
+                  <Link key={i} to={s.href} aria-label={s.label} className={cls}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <a key={i} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label} className={cls}>
+                    {inner}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -108,10 +130,10 @@ export default function Footer() {
             <ul className="space-y-3.5">
               {NAV_LINKS.map((l, i) => (
                 <li key={i}>
-                  <a href="#" className="group flex items-center gap-2.5 text-base font-bold text-neutral-700 hover:text-black transition-colors">
+                  <Link to={l.to} className="group flex items-center gap-2.5 text-base font-bold text-neutral-700 hover:text-black transition-colors">
                     <span className="w-2 h-2 bg-black group-hover:bg-[#e4f542] transition-colors"></span>
-                    {l}
-                  </a>
+                    {l.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -125,12 +147,12 @@ export default function Footer() {
                 const Icon = p.icon;
                 return (
                   <li key={i}>
-                    <a href={p.href || '#'} className="group flex items-center gap-3 text-base font-bold text-neutral-700 hover:text-black transition-colors">
+                    <Link to={p.to} className="group flex items-center gap-3 text-base font-bold text-neutral-700 hover:text-black transition-colors">
                       <span className="w-9 h-9 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000]" style={{ background: p.bg }}>
                         <Icon className="w-4 h-4" />
                       </span>
                       {p.name}
-                    </a>
+                    </Link>
                   </li>
                 );
               })}
@@ -143,17 +165,25 @@ export default function Footer() {
             <ul className="space-y-4">
               {CONTACTS.map((c, i) => {
                 const Icon = c.icon;
+                const inner = (
+                  <>
+                    <span className="w-10 h-10 border-2 border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span>
+                      <span className="block text-[11px] font-bold text-neutral-400">{c.label}</span>
+                      <span className="block text-sm font-black" dir="ltr">{c.value}</span>
+                    </span>
+                  </>
+                );
+                const cls = 'group flex items-center gap-3';
                 return (
                   <li key={i}>
-                    <a href={c.href} className="group flex items-center gap-3">
-                      <span className="w-10 h-10 border-2 border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
-                        <Icon className="w-4 h-4" />
-                      </span>
-                      <span>
-                        <span className="block text-[11px] font-bold text-neutral-400">{c.label}</span>
-                        <span className="block text-sm font-black" dir="ltr">{c.value}</span>
-                      </span>
-                    </a>
+                    {c.href.startsWith('/') ? (
+                      <Link to={c.href} className={cls}>{inner}</Link>
+                    ) : (
+                      <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className={cls}>{inner}</a>
+                    )}
                   </li>
                 );
               })}
