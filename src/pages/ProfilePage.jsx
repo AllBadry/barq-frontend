@@ -9,6 +9,7 @@ import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
 import { useAuth } from '../context/useAuth';
 import { useCart } from '../context/useCart';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 function Field({ label, icon, children }) {
   return (
@@ -36,6 +37,18 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
   const [verifyErr, setVerifyErr] = useState('');
   const [verifyOk, setVerifyOk] = useState('');
   const [resendMsg, setResendMsg] = useState('');
+  const [showLogout, setShowLogout] = useState(false);
+  const [logoutBusy, setLogoutBusy] = useState(false);
+
+  const confirmLogout = () => {
+    setLogoutBusy(true);
+    Promise.resolve(logout())
+      .catch(() => {})
+      .finally(() => {
+        setLogoutBusy(false);
+        setShowLogout(false);
+      });
+  };
 
   const handleVerify = (e) => {
     e.preventDefault();
@@ -80,9 +93,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
   };
 
   const handleLogout = () => {
-    if (window.confirm('هل تريد تسجيل الخروج من حسابك؟')) {
-      logout();
-    }
+    setShowLogout(true);
   };
 
   return (
@@ -263,6 +274,18 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
       </div>
 
       <Footer />
+
+      <ConfirmDialog
+        open={showLogout}
+        title="تسجيل الخروج"
+        message="هل أنت متأكد من تسجيل الخروج من حسابك؟"
+        confirmText="تسجيل الخروج"
+        cancelText="إلغاء"
+        danger
+        busy={logoutBusy}
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogout(false)}
+      />
     </main>
   );
 }
