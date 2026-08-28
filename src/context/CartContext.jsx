@@ -86,9 +86,11 @@ export function CartProvider({ children }) {
 
   // حفظ السلة في المكان المناسب حسب حالة الدخول
   const persist = (next) => {
-    if (userRef.current && loadedRef.current) {
+    if (userRef.current) {
+      // مسجّل الدخول: احفظ مع الحساب على السيرفر
       api.request('/api/cart', { method: 'PUT', body: { items: next } }).catch(() => {});
     } else {
+      // زائر: احفظ محلياً
       writeGuest(next);
     }
   };
