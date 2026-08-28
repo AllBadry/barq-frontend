@@ -76,7 +76,15 @@ export default function AuthPage() {
         setMode('verify');
       }
     } catch (err) {
-      setError(err.message || 'حدث خطأ أثناء العملية');
+      const msg = err.message || 'حدث خطأ أثناء العملية';
+      // إن كان الحساب غير مفعل، السيرفر أرسل رمزاً جديداً — نوجّه لشاشة التفعيل
+      if (isLogin && /تفعيل|verify/i.test(msg)) {
+        setVerifyAddr(email);
+        setMode('verify');
+        setError('تم إرسال رمز تفعيل جديد إلى بريدك — أدخله لتفعيل حسابك');
+      } else {
+        setError(msg);
+      }
     }
   };
 
