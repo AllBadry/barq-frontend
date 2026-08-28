@@ -32,12 +32,53 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Project
+      - name: Build Project and Distribute Pages 🏗️
         run: |
           npm run build
-          node scripts/prepare-ghpages.mjs
+          cp dist/index.html dist/404.html
+          echo "barqstore.org" > dist/CNAME
 
-      - name: Publish Site into main (docs/)
+          # 🌟 إنشاء المجلدات
+          mkdir -p dist/about dist/products dist/contact dist/auth
+
+          # ===== من نحن =====
+          cp dist/index.html dist/about/index.html
+          sed -i 's#<title>.*</title>#<title>من نحن | متجر برق — نبيعُ حضورك الرقمي</title>#' dist/about/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/about" />#' dist/about/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/about" />#' dist/about/index.html
+          sed -i 's#<meta property="og:title"[^>]*>#<meta property="og:title" content="من نحن | متجر برق — نبيعُ حضورك الرقمي" />#' dist/about/index.html
+          sed -i 's#<meta property="og:description"[^>]*>#<meta property="og:description" content="برق متجر نموّ قنواتك على إنستغرام وفيسبوك وتيك توك — مشاهدات ولايكات ومتابعون بتفعيل فوري." />#' dist/about/index.html
+          sed -i 's#<meta name="twitter:title"[^>]*>#<meta name="twitter:title" content="من نحن | متجر برق" />#' dist/about/index.html
+          sed -i 's#<meta name="twitter:description"[^>]*>#<meta name="twitter:description" content="برق متجر نموّ قنواتك على إنستغرام وفيسبوك وتيك توك — مشاهدات ولايكات ومتابعون بتفعيل فوري." />#' dist/about/index.html
+
+          # ===== المنتجات =====
+          cp dist/index.html dist/products/index.html
+          sed -i 's#<title>.*</title>#<title>المنتجات | متجر برق — متابعون ومشاهدات ولايكات لكل المنصات</title>#' dist/products/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/products" />#' dist/products/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/products" />#' dist/products/index.html
+          sed -i 's#<meta property="og:title"[^>]*>#<meta property="og:title" content="المنتجات | متجر برق" />#' dist/products/index.html
+          sed -i 's#<meta property="og:description"[^>]*>#<meta property="og:description" content="متابعون مضمونون، مشاهدات ريلز، لايكات وتفاعل لإنستغرام وفيسبوك وتيك توك — أسعار بالدينار الأردني." />#' dist/products/index.html
+          sed -i 's#<meta name="twitter:title"[^>]*>#<meta name="twitter:title" content="المنتجات | متجر برق" />#' dist/products/index.html
+          sed -i 's#<meta name="twitter:description"[^>]*>#<meta name="twitter:description" content="متابعون مضمونون، مشاهدات ريلز، لايكات وتفاعل لإنستغرام وفيسبوك وتيك توك — أسعار بالدينار الأردني." />#' dist/products/index.html
+
+          # ===== تواصل معنا =====
+          cp dist/index.html dist/contact/index.html
+          sed -i 's#<title>.*</title>#<title>تواصل معنا | متجر برق — اطلب باقتك الآن</title>#' dist/contact/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/contact" />#' dist/contact/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/contact" />#' dist/contact/index.html
+          sed -i 's#<meta property="og:title"[^>]*>#<meta property="og:title" content="تواصل معنا | متجر برق" />#' dist/contact/index.html
+          sed -i 's#<meta property="og:description"[^>]*>#<meta property="og:description" content="تواصل مع فريق متجر برق عبر واتساب أو النموذج المباشر — متابعون ومشاهدات ولايكات لكل المنصات." />#' dist/contact/index.html
+          sed -i 's#<meta name="twitter:title"[^>]*>#<meta name="twitter:title" content="تواصل معنا | متجر برق" />#' dist/contact/index.html
+          sed -i 's#<meta name="twitter:description"[^>]*>#<meta name="twitter:description" content="تواصل مع فريق متجر برق عبر واتساب أو النموذج المباشر — متابعون ومشاهدات ولايكات لكل المنصات." />#' dist/contact/index.html
+
+          # ===== دخول النظام (لا تُفهرس) =====
+          cp dist/index.html dist/auth/index.html
+          sed -i 's#<title>.*</title>#<title>دخول النظام | متجر برق — حساباتك كلها بضغطة</title>#' dist/auth/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/auth" />#' dist/auth/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/auth" />#' dist/auth/index.html
+          sed -i 's#<meta name="robots"[^>]*>#<meta name="robots" content="noindex, follow" />#' dist/auth/index.html
+
+      - name: Publish Site into main (docs/) ⚡
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

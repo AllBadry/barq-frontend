@@ -7,7 +7,7 @@ import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
 import HeroSection from '../components/sections/HeroSection';
-import Categories from '../components/sections/Categories';
+import Categories from '../components/sections/categories';
 import AboutUs from '../components/sections/aboutus';
 import Contact from '../components/sections/contact';
 
