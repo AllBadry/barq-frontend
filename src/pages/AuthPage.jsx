@@ -47,7 +47,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [password, setPassword] = useState('');
-  const { user, register, login } = useAuth();
+  const { user, loading, register, login } = useAuth();
   const navigate = useNavigate();
 
   const isLogin = mode === 'login';
@@ -122,6 +122,8 @@ export default function AuthPage() {
 
   const inputCls =
     'auth-field w-full bg-white border-2 border-black px-4 py-3.5 pl-11 text-sm font-bold outline-none placeholder:text-neutral-300 focus:shadow-[4px_4px_0px_#000] focus:-translate-x-0.5 focus:-translate-y-0.5 transition-all duration-150';
+
+  if (loading) return null;
 
   if (user) return <Navigate to="/profile" replace />;
 

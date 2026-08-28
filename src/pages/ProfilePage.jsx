@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -25,12 +25,10 @@ function Field({ label, icon, children }) {
 const inputCls =
   'w-full bg-white border-2 border-black px-4 py-3.5 pl-11 text-sm font-bold outline-none placeholder:text-neutral-300 focus:shadow-[4px_4px_0px_#000] focus:-translate-x-0.5 focus:-translate-y-0.5 transition-all duration-150';
 
-export default function ProfilePage() {
+function ProfileInner({ user, updateProfile, logout, cartCount }) {
   const pageRef = useRef(null);
-  const { user, updateProfile, logout } = useAuth();
-  const { count } = useCart();
-  const [name, setName] = useState(user ? user.name : '');
-  const [phone, setPhone] = useState(user ? user.phone || '' : '');
+  const [name, setName] = useState(user.name);
+  const [phone, setPhone] = useState(user.phone || '');
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
@@ -43,21 +41,18 @@ export default function ProfilePage() {
     );
   }, { scope: pageRef });
 
-  if (!user) return <Navigate to="/auth" replace />;
-
   const initial = user.name.trim().charAt(0) || 'ب';
 
   const handleSave = (e) => {
     e.preventDefault();
     setError('');
     setSaved(false);
-    try {
-      updateProfile({ name, phone });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    } catch (err) {
-      setError(err.message);
-    }
+    updateProfile({ name, phone })
+      .then(() => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      })
+      .catch((err) => setError(err.message));
   };
 
   const handleLogout = () => {
@@ -107,7 +102,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <ShoppingCart className="w-4 h-4 text-[#e4f542] shrink-0" />
-                سلتك الحالية: <span className="text-white font-black" dir="ltr">{count}</span> عنصر
+                سلتك الحالية: <span className="text-white font-black" dir="ltr">{cartCount}</span> عنصر
               </div>
             </div>
 
@@ -207,4 +202,21 @@ export default function ProfilePage() {
       <Footer />
     </main>
   );
+}
+
+export default function ProfilePage() {
+  const { user, loading, updateProfile, logout } = useAuth();
+  const { count } = useCart();
+
+  if (loading) {
+    return (
+      <main dir="rtl" className="w-full min-h-screen bg-white flex items-center justify-center">
+        <span className="w-10 h-10 rounded-full border-4 border-black border-t-transparent animate-spin" />
+      </main>
+    );
+  }
+
+  if (!user) return <Navigate to="/auth" replace />;
+
+  return <ProfileInner key={user.email} user={user} updateProfile={updateProfile} logout={logout} cartCount={count} />;
 }

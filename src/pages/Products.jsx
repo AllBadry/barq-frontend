@@ -1,14 +1,13 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
-import { PLATFORMS, orderLink, cartItem } from '../data/products';
+import { PLATFORMS, cartItem } from '../data/products';
 import { useCart } from '../context/useCart';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -37,6 +36,109 @@ function AddToCartButton({ p, g, item }) {
       {done ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
       {done ? 'أُضيف' : 'أضِف للسلة'}
     </button>
+  );
+}
+
+function useDragScroll() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+    const onDown = (e) => {
+      isDown = true;
+      startX = e.pageX;
+      startScroll = el.scrollLeft;
+    };
+    const onMove = (e) => {
+      if (!isDown) return;
+      el.scrollLeft = startScroll - (e.pageX - startX);
+    };
+    const onUp = () => {
+      isDown = false;
+    };
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointerleave', onUp);
+    return () => {
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointerleave', onUp);
+    };
+  }, []);
+  return ref;
+}
+
+function TierRow({ p, g, gi }) {
+  const scrollRef = useDragScroll();
+  const Icon = p.Icon;
+  return (
+    <div className="relative">
+      <div className="pto-sec-bar flex items-center gap-4 mb-7">
+        <span className="pto-sec-bar-dot w-3 h-3 rotate-45" style={{ background: p.color }}></span>
+        <h3 className="text-2xl md:text-3xl font-black tracking-tight">
+          {g.cat}
+          {g.sub ? <span className="text-neutral-500 text-lg md:text-xl font-bold"> — {g.sub}</span> : null}
+        </h3>
+        {g.badge ? (
+          <span className="pto-badge inline-flex items-center gap-1.5 px-3 py-1 bg-[#e4f542] text-black text-[10px] font-black uppercase tracking-widest border-2 border-black rounded-full shadow-[2px_2px_0px_#000]">
+            <ShieldCheck className="w-3 h-3" />
+            {g.badge}
+          </span>
+        ) : null}
+        <span className="flex-1 h-2 bg-black/10 -skew-x-12 overflow-hidden">
+          <span className="pto-sec-bar-fill block h-full origin-left" style={{ background: `linear-gradient(90deg, ${p.color}, ${p.dark})`, transform: 'scaleX(0)' }}></span>
+        </span>
+      </div>
+
+      <div
+        ref={scrollRef}
+        className="flex gap-4 md:gap-5 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory select-none cursor-grab active:cursor-grabbing [scrollbar-width:thin]"
+        style={{ scrollPaddingInline: '6px' }}
+      >
+        {g.items.map((it, ii) => (
+          <div
+            key={ii}
+            className="pto-card relative group shrink-0 w-[260px] sm:w-[280px] snap-start bg-white border-2 border-black rounded-xl p-5 shadow-[5px_5px_0px_#000] overflow-hidden hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[9px_9px_0px_#000] hover:rotate-1 transition-all duration-200"
+          >
+            <span className="absolute top-0 right-0 w-12 h-1.5" style={{ background: `linear-gradient(90deg, ${p.color}, ${p.dark})` }}></span>
+            <span className="absolute -top-5 -left-5 w-14 h-14 rounded-full opacity-10" style={{ background: p.color }}></span>
+
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400" dir="ltr">
+                  {p.en}/0{gi + 1}.{ii + 1}
+                </p>
+                <p className="mt-3 text-4xl md:text-5xl font-black tabular-nums tracking-tight" dir="ltr" style={{ color: p.dark }}>
+                  {it.qty}
+                </p>
+              </div>
+              <div
+                className="w-10 h-10 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000] transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110"
+                style={{ background: `linear-gradient(135deg, ${p.color}, ${p.dark})` }}
+              >
+                <Icon className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-neutral-500 truncate">{g.cat} · {p.name}</p>
+                <p className="mt-1 text-2xl md:text-3xl font-black tabular-nums" dir="ltr">
+                  <span style={{ color: p.dark }}>{it.price}</span>
+                  <span className="text-[10px] font-black text-neutral-500 ml-1">JOD</span>
+                </p>
+              </div>
+              <AddToCartButton p={p} g={g} item={it} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -228,7 +330,7 @@ export default function Products() {
           );
         })}
         <span className="w-px h-10 bg-black/20"></span>
-        <FaWhatsapp className="w-4 h-4 text-[#25D366]" />
+        <Zap className="w-4 h-4 text-[#e4f542]" />
       </aside>
 
       {/* ============ HERO ============ */}
@@ -321,75 +423,7 @@ export default function Products() {
               {/* الأقسام الفرعية */}
               <div className="mt-14 space-y-14">
                 {p.groups.map((g, gi) => (
-                  <div key={gi} className="relative">
-                    <div className="pto-sec-bar flex items-center gap-4 mb-7">
-                      <span className="pto-sec-bar-dot w-3 h-3 rotate-45" style={{ background: p.color }}></span>
-                      <h3 className="text-2xl md:text-3xl font-black tracking-tight">
-                        {g.cat}
-                        {g.sub ? <span className="text-neutral-500 text-lg md:text-xl font-bold"> — {g.sub}</span> : null}
-                      </h3>
-                      {g.badge ? (
-                        <span className="pto-badge inline-flex items-center gap-1.5 px-3 py-1 bg-[#e4f542] text-black text-[10px] font-black uppercase tracking-widest border-2 border-black rounded-full shadow-[2px_2px_0px_#000]">
-                          <ShieldCheck className="w-3 h-3" />
-                          {g.badge}
-                        </span>
-                      ) : null}
-                      <span className="flex-1 h-2 bg-black/10 -skew-x-12 overflow-hidden">
-                        <span className="pto-sec-bar-fill block h-full origin-left" style={{ background: `linear-gradient(90deg, ${p.color}, ${p.dark})`, transform: 'scaleX(0)' }}></span>
-                      </span>
-                    </div>
-
-                    <div className={`grid grid-cols-1 sm:grid-cols-2 ${g.items.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4 md:gap-5`}>
-                      {g.items.map((it, ii) => (
-                        <div
-                          key={ii}
-                          className="pto-card relative group bg-white border-2 border-black rounded-xl p-5 shadow-[5px_5px_0px_#000] overflow-hidden hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[9px_9px_0px_#000] hover:rotate-1 transition-all duration-200"
-                        >
-                          <span className="absolute top-0 right-0 w-12 h-1.5" style={{ background: `linear-gradient(90deg, ${p.color}, ${p.dark})` }}></span>
-                          <span className="absolute -top-5 -left-5 w-14 h-14 rounded-full opacity-10" style={{ background: p.color }}></span>
-
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400" dir="ltr">
-                                {p.en}/0{gi + 1}.{ii + 1}
-                              </p>
-                              <p className="mt-3 text-4xl md:text-5xl font-black tabular-nums tracking-tight" dir="ltr" style={{ color: p.dark }}>
-                                {it.qty}
-                              </p>
-                            </div>
-                            <div
-                              className="w-10 h-10 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000] transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110"
-                              style={{ background: `linear-gradient(135deg, ${p.color}, ${p.dark})` }}
-                            >
-                              <Icon className="w-4 h-4" />
-                            </div>
-                          </div>
-
-                          <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-2.5">
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-bold text-neutral-500">{g.cat} · {p.name}</p>
-                              <p className="mt-1 text-3xl font-black tabular-nums" dir="ltr">
-                                <span style={{ color: p.dark }}>{it.price}</span>
-                                <span className="text-xs font-black text-neutral-500 ml-1">JOD</span>
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <AddToCartButton p={p} g={g} item={it} />
-                              <a
-                                href={orderLink(p, g, it)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 bg-black text-white text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] hover:bg-[#25D366] hover:text-black hover:shadow-[3px_3px_0px_#25D366]/40 transition-all duration-200"
-                              >
-                                <FaWhatsapp className="w-3.5 h-3.5" />
-                                اطلب
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <TierRow key={gi} p={p} g={g} gi={gi} />
                 ))}
               </div>
 
