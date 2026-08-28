@@ -50,5 +50,6 @@ jobs:
             echo "No changes to deploy"
           else
             git commit -m "deploy: publish built site to docs"
-            git push origin main
+            # actions/checkout يترك HEAD منفصلاً (detached) — لذا ندفع HEAD إلى main بدل ref محلي
+            git push origin HEAD:main
           fi
