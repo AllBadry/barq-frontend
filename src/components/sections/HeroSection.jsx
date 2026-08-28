@@ -83,6 +83,7 @@ export default function HeroSection() {
           dir="ltr" 
           className="flex items-center justify-center flex-wrap gap-1 sm:gap-2 md:gap-4 text-[12vw] sm:text-[10vw] md:text-[8.5rem] font-black tracking-tighter leading-none select-none uppercase"
         >
+          BAR
           <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
             <img src="/mann.png" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
           </span>
