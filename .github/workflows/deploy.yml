@@ -1,7 +1,6 @@
 name: Deploy Barq Store to GitHub Pages
 
 # الروبوت سيعمل فقط عند رفع كود جديد على الفرع main
-# (نتخطّى رسائل الرفع التي يكتبها الروبوت نفسه لمنع التكرار اللانهائي)
 on:
   push:
     branches:
@@ -19,26 +18,26 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # نمنع الحلقة: لا نقوم بالبناء والنشر عندما يكون آخر كمت/دفع هو رفع الروبوت نفسه
-    if: ${{ !startsWith(github.event.head_commit.message, 'deploy: ') }}
+    # نمنع الحلقة: نتخطّى الرفع الذي يكتبه الروبوت نفسه عندما يرفع الموقع المبني
+    if: "${{ startsWith(github.event.head_commit.message, 'deploy: ') == false }}"
     steps:
-      - name: Checkout Code 🛎
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ⚙️
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install Dependencies 📦
+      - name: Install Dependencies
         run: npm install
 
-      - name: Build Project 🏗
+      - name: Build Project
         run: |
           npm run build
           node scripts/prepare-ghpages.mjs
 
-      - name: Publish Site into main (docs/) ⚡
+      - name: Publish Site into main (docs/)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -50,6 +49,5 @@ jobs:
             echo "No changes to deploy"
           else
             git commit -m "deploy: publish built site to docs"
-            # actions/checkout يترك HEAD منفصلاً (detached) — لذا ندفع HEAD إلى main بدل ref محلي
             git push origin HEAD:main
           fi
