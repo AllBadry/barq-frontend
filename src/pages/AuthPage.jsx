@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Zap, Mail, Lock, User, Phone, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
@@ -7,6 +8,7 @@ import { FaWhatsapp, FaInstagram, FaTiktok } from 'react-icons/fa';
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
+import { useAuth } from '../context/useAuth';
 
 const BLOB = 'radial-gradient(circle at center, transparent 0 58%, rgba(255,255,255,0.14) 60% 100%)';
 
@@ -40,12 +42,32 @@ export default function AuthPage() {
   const fieldsRef = useRef(null);
   const brandInnerRef = useRef(null);
   const [mode, setMode] = useState('login');
+  const [error, setError] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [password, setPassword] = useState('');
+  const { user, register, login } = useAuth();
+  const navigate = useNavigate();
 
   const isLogin = mode === 'login';
 
   const switchMode = (next) => {
     if (next === mode) return;
+    setError('');
     setMode(next);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      if (isLogin) login({ email, password });
+      else register({ name, email, phone: whatsapp, password });
+      navigate('/profile', { replace: true });
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   useGSAP(() => {
@@ -100,6 +122,8 @@ export default function AuthPage() {
 
   const inputCls =
     'auth-field w-full bg-white border-2 border-black px-4 py-3.5 pl-11 text-sm font-bold outline-none placeholder:text-neutral-300 focus:shadow-[4px_4px_0px_#000] focus:-translate-x-0.5 focus:-translate-y-0.5 transition-all duration-150';
+
+  if (user) return <Navigate to="/profile" replace />;
 
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
@@ -239,13 +263,19 @@ export default function AuthPage() {
                 {isLogin ? 'سجّل دخولك للمتابعة من حيث توقفت.' : 'دقيقة واحدة وتبدأ التوفير والتتبع.'}
               </p>
 
-              {/* الحقول */}
-              <form onSubmit={(e) => e.preventDefault()} className="auth-body mt-8 space-y-4">
+{/* الحقول */}
+              <form onSubmit={handleSubmit} className="auth-body mt-8 space-y-4">
                 {!isLogin && (
                   <div>
                     <FieldLabel icon={<User className="w-3.5 h-3.5" />}>الاسم الكامل</FieldLabel>
                     <div className="relative mt-1">
-                      <input type="text" placeholder="مثال: أحمد الزعبي" className={inputCls} />
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="مثال: أحمد الزعبي"
+                        className={inputCls}
+                      />
                       <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" />
                     </div>
                   </div>
@@ -254,7 +284,14 @@ export default function AuthPage() {
                 <div>
                   <FieldLabel icon={<Mail className="w-3.5 h-3.5" />}>البريد الإلكتروني</FieldLabel>
                   <div className="relative mt-1">
-                    <input type="email" placeholder="you@email.com" dir="ltr" className={inputCls} />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      dir="ltr"
+                      className={inputCls}
+                    />
                     <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" />
                   </div>
                 </div>
@@ -263,7 +300,14 @@ export default function AuthPage() {
                   <div>
                     <FieldLabel icon={<Phone className="w-3.5 h-3.5" />}>واتساب (اختياري)</FieldLabel>
                     <div className="relative mt-1">
-                      <input type="tel" placeholder="+9627xxxxxxxx" dir="ltr" className={inputCls} />
+                      <input
+                        type="tel"
+                        value={whatsapp}
+                        onChange={(e) => setWhatsapp(e.target.value)}
+                        placeholder="+9627xxxxxxxx"
+                        dir="ltr"
+                        className={inputCls}
+                      />
                       <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" />
                     </div>
                   </div>
@@ -279,10 +323,23 @@ export default function AuthPage() {
                     )}
                   </div>
                   <div className="relative mt-1">
-                    <input type="password" placeholder="••••••••" dir="ltr" className={inputCls} />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      dir="ltr"
+                      className={inputCls}
+                    />
                     <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" />
                   </div>
                 </div>
+
+                {error && (
+                  <p className="text-xs font-black text-red-600 bg-red-50 border-2 border-red-600 px-3 py-2">
+                    {error}
+                  </p>
+                )}
 
                 <button
                   type="submit"

@@ -1,9 +1,68 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Search, X, Zap, CornerDownLeft, ArrowRight } from 'lucide-react';
+import { Search, X, Zap, CornerDownLeft, ArrowRight, ShoppingCart, Check } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { searchProducts, SUGGESTIONS, POPULAR, orderLink } from '../../data/products';
+import { searchProducts, SUGGESTIONS, POPULAR, orderLink, cartItem } from '../../data/products';
+import { useCart } from '../../context/useCart';
+
+function ResultRow({ r, onPick, onAdd }) {
+  const Icon = r.p.Icon;
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    onAdd(cartItem(r.p, r.g, r.item));
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1400);
+  };
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onPick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onPick();
+      }}
+      className="search-result-item group w-full flex items-center gap-4 p-3 text-right border-2 border-transparent hover:border-black hover:bg-neutral-50 cursor-pointer transition-all duration-150"
+    >
+      <span
+        className="relative w-11 h-11 shrink-0 rounded-md border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]"
+        style={{ background: r.p.color, color: r.p.dark }}
+      >
+        <Icon className="w-5 h-5" />
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block font-black text-sm truncate">
+          {r.g.cat} — {r.p.name}
+          {r.g.sub ? <span className="text-neutral-400"> ({r.g.sub})</span> : null}
+        </span>
+        <span className="block text-[11px] font-bold text-neutral-500 mt-0.5" dir="ltr">
+          {r.item.qty} · {r.p.en}/{r.g.cat}
+        </span>
+      </span>
+      <span className="shrink-0 flex items-center gap-2">
+        <span className="text-lg font-black tabular-nums" dir="ltr">
+          {r.item.price}
+          <span className="text-[10px] text-neutral-500 mr-1">JOD</span>
+        </span>
+        <span className="w-8 h-8 rounded-md border-2 border-black flex items-center justify-center bg-[#e4f542] opacity-0 group-hover:opacity-100 transition-opacity">
+          <FaWhatsapp className="w-4 h-4" />
+        </span>
+        <button
+          onClick={handleAdd}
+          aria-label={added ? 'أُضيف إلى السلة' : 'أضف إلى السلة'}
+          className={`w-8 h-8 rounded-md border-2 border-black flex items-center justify-center shrink-0 transition-all duration-150 ${
+            added ? 'bg-[#e4f542]' : 'bg-white hover:bg-[#407BFF] hover:text-white opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          {added ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+        </button>
+      </span>
+    </div>
+  );
+}
 
 export default function SearchOverlay({ onClose }) {
   const rootRef = useRef(null);
@@ -11,6 +70,7 @@ export default function SearchOverlay({ onClose }) {
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const [query, setQuery] = useState('');
+  const { add } = useCart();
 
   useGSAP(() => {
     gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
@@ -44,41 +104,6 @@ export default function SearchOverlay({ onClose }) {
   const pick = (r) => {
     window.open(orderLink(r.p, r.g, r.item), '_blank', 'noreferrer');
     onClose();
-  };
-
-  const ResultRow = ({ r }) => {
-    const Icon = r.p.Icon;
-    return (
-      <button
-        onClick={() => pick(r)}
-        className="search-result-item group w-full flex items-center gap-4 p-3 text-right border-2 border-transparent hover:border-black hover:bg-neutral-50 transition-all duration-150"
-      >
-        <span
-          className="relative w-11 h-11 shrink-0 rounded-md border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]"
-          style={{ background: r.p.color, color: r.p.dark }}
-        >
-          <Icon className="w-5 h-5" />
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="block font-black text-sm truncate">
-            {r.g.cat} — {r.p.name}
-            {r.g.sub ? <span className="text-neutral-400"> ({r.g.sub})</span> : null}
-          </span>
-          <span className="block text-[11px] font-bold text-neutral-500 mt-0.5" dir="ltr">
-            {r.item.qty} · {r.p.en}/{r.g.cat}
-          </span>
-        </span>
-        <span className="shrink-0 flex items-center gap-2">
-          <span className="text-lg font-black tabular-nums" dir="ltr">
-            {r.item.price}
-            <span className="text-[10px] text-neutral-500 mr-1">JOD</span>
-          </span>
-          <span className="w-8 h-8 rounded-md border-2 border-black flex items-center justify-center bg-[#e4f542] opacity-0 group-hover:opacity-100 transition-opacity">
-            <FaWhatsapp className="w-4 h-4" />
-          </span>
-        </span>
-      </button>
-    );
   };
 
   const list = showSuggestions ? POPULAR : results;
@@ -174,7 +199,7 @@ export default function SearchOverlay({ onClose }) {
               <div className="p-5 pt-3">
                 <div className="border-2 border-black divide-y-2 divide-black/10">
                   {list.map((r, i) => (
-                    <ResultRow key={i} r={r} />
+                    <ResultRow key={i} r={r} onPick={() => pick(r)} onAdd={add} />
                   ))}
                 </div>
               </div>
@@ -186,7 +211,7 @@ export default function SearchOverlay({ onClose }) {
               </p>
               <div className="border-2 border-black divide-y-2 divide-black/10">
                 {results.map((r, i) => (
-                  <ResultRow key={i} r={r} />
+                  <ResultRow key={i} r={r} onPick={() => pick(r)} onAdd={add} />
                 ))}
               </div>
             </div>

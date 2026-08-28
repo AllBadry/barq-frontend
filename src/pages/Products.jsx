@@ -2,15 +2,43 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowDown, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
-import { PLATFORMS, orderLink } from '../data/products';
+import { PLATFORMS, orderLink, cartItem } from '../data/products';
+import { useCart } from '../context/useCart';
 
 gsap.registerPlugin(ScrollTrigger);
+
+function AddToCartButton({ p, g, item }) {
+  const { add } = useCart();
+  const [done, setDone] = useState(false);
+
+  const handle = (e) => {
+    e.preventDefault();
+    add(cartItem(p, g, item));
+    setDone(true);
+    setTimeout(() => setDone(false), 1400);
+  };
+
+  return (
+    <button
+      onClick={handle}
+      aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
+      className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] transition-all duration-200 ${
+        done
+          ? 'bg-[#e4f542] hover:bg-[#d6e72c]'
+          : 'bg-white hover:bg-[#407BFF] hover:text-white'
+      }`}
+    >
+      {done ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+      {done ? 'أُضيف' : 'أضِف للسلة'}
+    </button>
+  );
+}
 
 export default function Products() {
   const mainRef = useRef(null);
@@ -337,23 +365,26 @@ export default function Products() {
                             </div>
                           </div>
 
-                          <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-3">
-                            <div>
+                          <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-2.5">
+                            <div className="min-w-0">
                               <p className="text-[10px] font-bold text-neutral-500">{g.cat} · {p.name}</p>
                               <p className="mt-1 text-3xl font-black tabular-nums" dir="ltr">
                                 <span style={{ color: p.dark }}>{it.price}</span>
                                 <span className="text-xs font-black text-neutral-500 ml-1">JOD</span>
                               </p>
                             </div>
-                            <a
-                              href={orderLink(p, g, it)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-2 bg-black text-white text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] hover:bg-[#25D366] hover:text-black hover:shadow-[3px_3px_0px_#25D366]/40 transition-all duration-200"
-                            >
-                              <FaWhatsapp className="w-3.5 h-3.5" />
-                              اطلب
-                            </a>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <AddToCartButton p={p} g={g} item={it} />
+                              <a
+                                href={orderLink(p, g, it)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 bg-black text-white text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] hover:bg-[#25D366] hover:text-black hover:shadow-[3px_3px_0px_#25D366]/40 transition-all duration-200"
+                              >
+                                <FaWhatsapp className="w-3.5 h-3.5" />
+                                اطلب
+                              </a>
+                            </div>
                           </div>
                         </div>
                       ))}

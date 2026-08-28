@@ -40,7 +40,7 @@ jobs:
           echo "barqstore.org" > dist/CNAME
 
           # 🌟 إنشاء المجلدات
-          mkdir -p dist/about dist/products dist/contact dist/auth
+          mkdir -p dist/about dist/products dist/contact dist/auth dist/cart dist/profile
 
           # ===== من نحن =====
           cp dist/index.html dist/about/index.html
@@ -78,6 +78,20 @@ jobs:
           sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/auth" />#' dist/auth/index.html
           sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/auth" />#' dist/auth/index.html
           sed -i 's#<meta name="robots"[^>]*>#<meta name="robots" content="noindex, follow" />#' dist/auth/index.html
+
+          # ===== السلة (لا تُفهرس) =====
+          cp dist/index.html dist/cart/index.html
+          sed -i 's#<title>.*</title>#<title>سلة المشتريات | متجر برق</title>#' dist/cart/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/cart" />#' dist/cart/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/cart" />#' dist/cart/index.html
+          sed -i 's#<meta name="robots"[^>]*>#<meta name="robots" content="noindex, follow" />#' dist/cart/index.html
+
+          # ===== البروفايل (لا يُفهرس) =====
+          cp dist/index.html dist/profile/index.html
+          sed -i 's#<title>.*</title>#<title>بروفايلي | متجر برق — حساباتك كلها بضغطة</title>#' dist/profile/index.html
+          sed -i 's#<link rel="canonical"[^>]*>#<link rel="canonical" href="https://barqstore.org/profile" />#' dist/profile/index.html
+          sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/profile" />#' dist/profile/index.html
+          sed -i 's#<meta name="robots"[^>]*>#<meta name="robots" content="noindex, follow" />#' dist/profile/index.html
 
       - name: Upload Pages Artifact ⚡
         uses: actions/upload-pages-artifact@v3

@@ -4,6 +4,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Search, ShoppingCart, User, Menu, X, Zap } from 'lucide-react';
 import SearchOverlay from './SearchOverlay';
+import { useCart } from '../../context/useCart';
+import { useAuth } from '../../context/useAuth';
 
 const LINKS = [
   { to: '/#home', label: 'الرئيسية' },
@@ -16,8 +18,11 @@ export default function Navbar() {
   const navRef = useRef();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { count } = useCart();
+  const { user } = useAuth();
 
   const close = () => setOpen(false);
+  const profileLabel = user ? user.name.split(' ')[0] : null;
 
   useGSAP(() => {
     gsap.from(navRef.current, {
@@ -63,14 +68,18 @@ export default function Navbar() {
             <Search className="w-4 h-4" />
           </button>
 
-          <Link to="/#offers" className="relative w-10 h-10 bg-white border-2 border-black flex items-center justify-center text-black hover:bg-neutral-100 transition-all">
+          <Link to="/cart" className="relative w-10 h-10 bg-white border-2 border-black flex items-center justify-center text-black hover:bg-neutral-100 transition-all" aria-label="سلة المشتريات">
             <ShoppingCart className="w-4 h-4" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600"></span>
+            {count > 0 && (
+              <span className="absolute -top-2.5 -left-2.5 min-w-[20px] h-5 px-1 bg-[#e4f542] text-black text-[10px] font-black border-2 border-black flex items-center justify-center tabular-nums" dir="ltr">
+                {count}
+              </span>
+            )}
           </Link>
 
-          <Link to="/auth" className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-black text-white text-xs font-black uppercase tracking-wider hover:bg-neutral-800 transition-all">
+          <Link to={user ? '/profile' : '/auth'} className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-black text-white text-xs font-black uppercase tracking-wider hover:bg-neutral-800 transition-all">
             <User className="w-3.5 h-3.5" />
-            <span>دخول النظام</span>
+            <span>{user ? `بروفايلي (${profileLabel})` : 'دخول النظام'}</span>
           </Link>
 
           <button className="md:hidden w-10 h-10 bg-white border-2 border-black flex items-center justify-center text-black" onClick={() => setOpen(!open)} aria-label="القائمة">
@@ -100,20 +109,25 @@ export default function Navbar() {
 
           <div className="p-4 pt-2 flex items-stretch gap-3">
             <Link
-              to="/auth"
+              to={user ? '/profile' : '/auth'}
               onClick={close}
               className="flex-1 flex items-center justify-center gap-2 bg-black text-white text-xs font-black uppercase tracking-wider px-6 py-3.5 hover:bg-neutral-800 transition-all"
             >
               <User className="w-3.5 h-3.5" />
-              <span>دخول النظام</span>
+              <span>{user ? `بروفايلي (${profileLabel})` : 'دخول النظام'}</span>
             </Link>
             <Link
-              to="/#offers"
+              to="/cart"
               onClick={close}
               className="relative w-12 h-12 bg-white border-2 border-black flex items-center justify-center text-black hover:bg-neutral-100 transition-all shrink-0"
+              aria-label="سلة المشتريات"
             >
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600"></span>
+              {count > 0 && (
+                <span className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1 bg-[#e4f542] text-black text-[10px] font-black border-2 border-black flex items-center justify-center tabular-nums" dir="ltr">
+                  {count}
+                </span>
+              )}
             </Link>
           </div>
         </div>

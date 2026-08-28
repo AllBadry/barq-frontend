@@ -209,3 +209,19 @@ export const orderLink = (p, g, item) =>
   `${WA}?text=${encodeURIComponent(
     `مرحباً برق، أريد طلب:\n${item.qty} ${g.cat} — ${p.name}${g.sub ? ` (${g.sub})` : ''}\nالسعر: ${item.price} JOD`
   )}`;
+
+export const cartItem = (p, g, item) => {
+  const gi = p.groups.indexOf(g);
+  const ii = g.items.indexOf(item);
+  return {
+    key: `${p.id}__${gi}__${ii}`,
+    platformId: p.id,
+    platformName: p.name,
+    en: p.en,
+    cat: g.cat,
+    sub: g.sub ?? null,
+    badge: g.badge ?? null,
+    qty: item.qty,
+    price: item.price,
+  };
+};

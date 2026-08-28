@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /auth
+Disallow: /cart
+Disallow: /profile
+
 Sitemap: https://barqstore.org/sitemap.xml
