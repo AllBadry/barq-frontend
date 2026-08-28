@@ -1,0 +1,95 @@
+import { useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+import Navbar from '../components/layouts/Navbar';
+import Footer from '../components/layouts/Footer';
+import HeroSection from '../components/sections/HeroSection';
+import Categories from '../components/sections/Categories';
+import AboutUs from '../components/sections/aboutus';
+import Contact from '../components/sections/contact';
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function Home() {
+  const mainRef = useRef(null);
+
+  useGSAP(() => {
+    const sections = gsap.utils.toArray('.cinematic-section');
+
+    sections.forEach((section, index) => {
+      if (index === 0) return;
+
+      // أنيميشن ظهور سلس ونظيف (Fade Up) بدون أي لاغ أو ثقل في السكرول
+      gsap.fromTo(section,
+        {
+          y: 50,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            toggleActions: 'play none none none', // يشتغل بسلاسة مرة واحدة عند الوصول إليه بدون ثقل الـ scrub
+          }
+        }
+      );
+    });
+  }, { scope: mainRef });
+
+  useGSAP(() => {
+    // ===== Parallax عام: كل عنصر يحمل data-parallax يتحرك بسرعة مختلفة عند السكرول =====
+    gsap.utils.toArray('[data-parallax]').forEach((el) => {
+      const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
+      const dist = speed * 250;
+      gsap.fromTo(
+        el,
+        { y: -dist },
+        {
+          y: dist,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el.closest('section') || el,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        }
+      );
+    });
+  }, { scope: mainRef });
+
+  return (
+    // تم إضافة overflow-x-hidden لضمان عدم ظهور السكرول الأفقي نهائياً
+    <main 
+      ref={mainRef} 
+      className="relative w-full bg-white min-h-screen overflow-x-hidden text-black selection:bg-[#e4f542]"
+    >
+      <Navbar />
+      
+      <div className="cinematic-section">
+        <HeroSection />
+      </div>
+
+      <AboutUs />
+
+      <div className="cinematic-section">
+        <Categories />
+      </div>
+
+      <div className="cinematic-section">
+        <Contact />
+      </div>
+
+      <div className="cinematic-section">
+        <Footer />
+      </div>
+      
+    </main>
+  );
+}
