@@ -1,25 +1,26 @@
 name: Deploy Barq Store to GitHub Pages
 
-# الروبوت سيعمل فقط عند رفع كود جديد على الفرع main
+# الروبوت يعمل فقط عند رفع كود جديد على الفرع main (أو يدوياً من صفحة Actions)
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
-# إعطاء صلاحية للروبوت للكتابة ورفع الملفات على نفس الفرع
+# صلاحيات النشر عبر GitHub Actions Pages — لا تتم الكتابة على أي فرع إطلاقاً
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
-# لا نترك أكثر من تشغيل واحد في نفس الوقت على نفس الفرع
+# لا نترك أكثر من تشغيل واحد في نفس الوقت على نفس النشر
 concurrency:
-  group: main
+  group: pages
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    # نمنع الحلقة: نتخطّى الرفع الذي يكتبه الروبوت نفسه عندما يرفع الموقع المبني
-    if: "${{ startsWith(github.event.head_commit.message, 'deploy: ') == false }}"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -78,17 +79,18 @@ jobs:
           sed -i 's#<meta property="og:url"[^>]*>#<meta property="og:url" content="https://barqstore.org/auth" />#' dist/auth/index.html
           sed -i 's#<meta name="robots"[^>]*>#<meta name="robots" content="noindex, follow" />#' dist/auth/index.html
 
-      - name: Publish Site into main (docs/) ⚡
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rm -rf docs
-          mkdir -p docs
-          cp -r dist/. docs/
-          git add docs
-          if git diff --cached --quiet; then
-            echo "No changes to deploy"
-          else
-            git commit -m "deploy: publish built site to docs"
-            git push origin HEAD:main
-          fi
+      - name: Upload Pages Artifact ⚡
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
