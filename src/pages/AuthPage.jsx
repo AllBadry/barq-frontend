@@ -47,26 +47,60 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [password, setPassword] = useState('');
-  const { user, loading, register, login } = useAuth();
+  const [verifyCode, setVerifyCode] = useState('');
+  const [verifyAddr, setVerifyAddr] = useState('');
+  const [resending, setResending] = useState(false);
+  const { user, loading, register, login, verifyEmail, resendVerification } = useAuth();
   const navigate = useNavigate();
 
   const isLogin = mode === 'login';
+  const showVerify = mode === 'verify' || (user && !user.isEmailVerified);
 
   const switchMode = (next) => {
     if (next === mode) return;
     setError('');
+    setVerifyCode('');
     setMode(next);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      if (isLogin) login({ email, password });
-      else register({ name, email, phone: whatsapp, password });
+      if (isLogin) {
+        await login({ email, password });
+        navigate('/profile', { replace: true });
+      } else {
+        await register({ name, email, phone: whatsapp, password });
+        setVerifyAddr(email);
+        setMode('verify');
+      }
+    } catch (err) {
+      setError(err.message || 'حدث خطأ أثناء العملية');
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await verifyEmail(verifyCode);
       navigate('/profile', { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'رمز التفعيل غير صحيح');
+    }
+  };
+
+  const handleResend = async () => {
+    setError('');
+    setResending(true);
+    try {
+      const data = await resendVerification();
+      setError(data?.message ? `✔ ${data.message}` : 'تم إرسال رمز جديد إلى بريدك');
+    } catch (err) {
+      setError(err.message || 'تعذّر إعادة إرسال الرمز');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -125,7 +159,7 @@ export default function AuthPage() {
 
   if (loading) return null;
 
-  if (user) return <Navigate to="/profile" replace />;
+  if (user && user.isEmailVerified) return <Navigate to="/profile" replace />;
 
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
@@ -248,25 +282,80 @@ export default function AuthPage() {
               </div>
 
               {/* العنوان المتغير */}
-              <h2 ref={headingRef} className="mt-9 text-4xl md:text-5xl font-black tracking-tighter leading-none">
-                {isLogin ? (
-                  <>
-                    أهلًا بعودتك
-                    <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] to-[#FF3BFF]">تسجيل الدخول</span>
-                  </>
-                ) : (
-                  <>
-                    ابدأ رحلتك
-                    <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FF3BFF] to-[#e4f542]">إنشاء حساب جديد</span>
-                  </>
-                )}
-              </h2>
-              <p className="mt-3 text-sm font-bold text-neutral-500">
-                {isLogin ? 'سجّل دخولك للمتابعة من حيث توقفت.' : 'دقيقة واحدة وتبدأ التوفير والتتبع.'}
-              </p>
+               <h2 ref={headingRef} className="mt-9 text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                 {showVerify ? (
+                   <>
+                     فعّل بريدك
+                     <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] to-[#e4f542]">رمز التفعيل</span>
+                   </>
+                 ) : isLogin ? (
+                   <>
+                     أهلًا بعودتك
+                     <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] to-[#FF3BFF]">تسجيل الدخول</span>
+                   </>
+                 ) : (
+                   <>
+                     ابدأ رحلتك
+                     <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FF3BFF] to-[#e4f542]">إنشاء حساب جديد</span>
+                   </>
+                 )}
+               </h2>
+               <p className="mt-3 text-sm font-bold text-neutral-500">
+                 {showVerify
+                   ? 'أدخلنا رمز التفعيل في بريدك الإلكتروني لإكمال التسجيل.'
+                   : isLogin
+                   ? 'سجّل دخولك للمتابعة من حيث توقفت.'
+                   : 'دقيقة واحدة وتبدأ التوفير والتتبع.'}
+               </p>
 
 {/* الحقول */}
-              <form onSubmit={handleSubmit} className="auth-body mt-8 space-y-4">
+               {showVerify ? (
+                 <form onSubmit={handleVerify} className="auth-body mt-8 space-y-4">
+                   <div>
+                     <FieldLabel icon={<ShieldCheck className="w-3.5 h-3.5" />}>رمز التفعيل (6 أرقام)</FieldLabel>
+                     <div className="relative mt-1">
+                       <input
+                         type="text"
+                         inputMode="numeric"
+                         value={verifyCode}
+                         onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                         placeholder="123456"
+                         dir="ltr"
+                         className={inputCls}
+                       />
+                       <ShieldCheck className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" />
+                     </div>
+                     <p className="mt-2 text-xs font-bold text-neutral-500">
+                       أرسلنا الرمز إلى{' '}
+                       <span dir="ltr" className="font-black text-black">{verifyAddr || (user && user.email) || 'بريدك'}</span>{' '}
+                       — تحقق من صندوق الوارد ومجلد البريد المزعج (Spam).
+                     </p>
+                   </div>
+
+                   {error && (
+                     <p className="text-xs font-black text-red-600 bg-red-50 border-2 border-red-600 px-3 py-2">{error}</p>
+                   )}
+
+                   <button
+                     type="submit"
+                     className="auth-field w-full mt-2 flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black hover:bg-neutral-800 hover:shadow-[6px_6px_0px_#e4f542] hover:-translate-y-0.5 transition-all duration-200"
+                   >
+                     <ShieldCheck className="w-4 h-4" />
+                     فعّل بريدي
+                     <ArrowLeft className="w-4 h-4" />
+                   </button>
+
+                   <button
+                     type="button"
+                     onClick={handleResend}
+                     disabled={resending}
+                     className="text-[11px] font-black text-neutral-400 hover:text-[#407BFF] transition-colors"
+                   >
+                     {resending ? 'جارٍ الإرسال…' : 'إعادة إرسال الرمز'}
+                   </button>
+                 </form>
+               ) : (
+               <form onSubmit={handleSubmit} className="auth-body mt-8 space-y-4">
                 {!isLogin && (
                   <div>
                     <FieldLabel icon={<User className="w-3.5 h-3.5" />}>الاسم الكامل</FieldLabel>
@@ -351,9 +440,20 @@ export default function AuthPage() {
                   {isLogin ? 'ادخُل الآن' : 'أنشئ الحساب'}
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-              </form>
 
-              {/* الفاصل */}
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => { setVerifyAddr(email); switchMode('verify'); }}
+                    className="block w-full text-center text-[11px] font-black text-neutral-400 hover:text-[#407BFF] transition-colors"
+                  >
+                    لدي رمز تفعيل؟ ادخله هنا
+                  </button>
+                )}
+               </form>
+               )}
+
+               {/* الفاصل */}
               <div className="auth-bot-appear mt-7 flex items-center gap-3">
                 <span className="flex-1 h-0.5 bg-black/10"></span>
                 <span className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">أو</span>

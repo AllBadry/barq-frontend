@@ -64,8 +64,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const verifyEmail = async (code) => {
+    const res = await api.request('/api/auth/verify-email', {
+      method: 'POST',
+      body: { code },
+    });
+    // تحديث بيانات المستخدم بعد التفعيل
+    const me = await api.request('/api/auth/me');
+    if (me.data) setUser(me.data.user);
+    return res.data;
+  };
+
+  const resendVerification = async () => {
+    const res = await api.request('/api/auth/resend-verification', { method: 'POST' });
+    return res.data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, updateProfile, logout }}>
+    <AuthContext.Provider value={{ user, loading, register, login, updateProfile, logout, verifyEmail, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );

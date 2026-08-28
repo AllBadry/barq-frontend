@@ -25,12 +25,36 @@ function Field({ label, icon, children }) {
 const inputCls =
   'w-full bg-white border-2 border-black px-4 py-3.5 pl-11 text-sm font-bold outline-none placeholder:text-neutral-300 focus:shadow-[4px_4px_0px_#000] focus:-translate-x-0.5 focus:-translate-y-0.5 transition-all duration-150';
 
-function ProfileInner({ user, updateProfile, logout, cartCount }) {
+function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, resendVerification }) {
   const pageRef = useRef(null);
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone || '');
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [verifyErr, setVerifyErr] = useState('');
+  const [verifyOk, setVerifyOk] = useState('');
+  const [resendMsg, setResendMsg] = useState('');
+
+  const handleVerify = (e) => {
+    e.preventDefault();
+    setVerifyErr('');
+    setVerifyOk('');
+    setVerifying(true);
+    verifyEmail(verifyCode)
+      .then(() => setVerifyOk('تم تفعيل بريدك بنجاح ✓'))
+      .catch((err) => setVerifyErr(err.message || 'رمز غير صحيح'))
+      .finally(() => setVerifying(false));
+  };
+
+  const handleResend = () => {
+    setVerifyErr('');
+    setResendMsg('');
+    resendVerification()
+      .then((d) => setResendMsg(d?.message || 'تم إرسال رمز جديد'))
+      .catch((err) => setVerifyErr(err.message || 'تعذّر الإرسال'));
+  };
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });
@@ -135,6 +159,45 @@ function ProfileInner({ user, updateProfile, logout, cartCount }) {
               يمكنك تعديل اسمك ورقم واتسابك — أما بريدك الإلكتروني فهو ثابت بجزء من هويتك.
             </p>
 
+            {!user.isEmailVerified && (
+              <div className="mt-6 border-2 border-[#407BFF] bg-[#eef4ff] p-4">
+                <div className="flex items-center gap-2 text-sm font-black text-[#1d4ed8]">
+                  <ShieldCheck className="w-4 h-4" />
+                  بريدك غير مفعل بعد
+                </div>
+                <p className="mt-1.5 text-xs font-bold text-neutral-600">
+                  أدخل رمز التفعيل الذي أرسلناه إلى بريدك لإكمال التسجيل.
+                </p>
+                <form onSubmit={handleVerify} className="mt-3 flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={verifyCode}
+                    onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    dir="ltr"
+                    className="flex-1 border-2 border-black px-4 py-3 text-sm font-bold outline-none focus:shadow-[3px_3px_0px_#000]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={verifying}
+                    className="bg-black text-white text-xs font-black px-5 py-3 border-2 border-black hover:bg-[#407BFF] transition-colors disabled:opacity-50"
+                  >
+                    {verifying ? 'جارٍ…' : 'تفعيل'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    className="text-xs font-black text-[#1d4ed8] px-3 py-3 hover:underline"
+                  >
+                    {resendMsg || 'إعادة إرسال'}
+                  </button>
+                </form>
+                {verifyErr && <p className="mt-2 text-xs font-black text-red-600">{verifyErr}</p>}
+                {verifyOk && <p className="mt-2 text-xs font-black text-green-600">{verifyOk}</p>}
+              </div>
+            )}
+
             <form onSubmit={handleSave} className="mt-8 space-y-5 max-w-md">
               <div>
                 <Field label="البريد الإلكتروني (ثابت)" icon={<Lock className="w-3.5 h-3.5" />}>
@@ -205,7 +268,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount }) {
 }
 
 export default function ProfilePage() {
-  const { user, loading, updateProfile, logout } = useAuth();
+  const { user, loading, updateProfile, logout, verifyEmail, resendVerification } = useAuth();
   const { count } = useCart();
 
   if (loading) {
@@ -218,5 +281,15 @@ export default function ProfilePage() {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  return <ProfileInner key={user.email} user={user} updateProfile={updateProfile} logout={logout} cartCount={count} />;
+  return (
+    <ProfileInner
+      key={user.email}
+      user={user}
+      updateProfile={updateProfile}
+      logout={logout}
+      cartCount={count}
+      verifyEmail={verifyEmail}
+      resendVerification={resendVerification}
+    />
+  );
 }
