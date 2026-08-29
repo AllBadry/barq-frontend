@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
 import { Send, MessageCircle, Mail, ArrowDown, Check, Plus, Zap, ArrowUpRight, Loader2 } from 'lucide-react';
-import { FaTelegramPlane, FaInstagram } from 'react-icons/fa';
+import { FaTelegramPlane } from 'react-icons/fa'; // تم إزالة أيقونة إنستغرام
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -14,36 +14,28 @@ import { usePopup } from '../context/usePopup';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// 🔥 تحديث القنوات بناءً على طلبك
 const CHANNELS = [
   {
     icon: MessageCircle,
     label: 'الدعم الفني',
     value: 'نظام التذاكر',
     dir: 'ltr',
-    note: 'الطريقة الرسمية للتواصل — مربوطة بالبوت',
-    href: '#contact-form',
+    note: 'من داخل حسابك لتتبع أفضل',
+    href: '/profile', // التوجيه للبروفايل
     bg: '#111111',
     tag: 'SUPPORT',
+    internal: true, // علامة تدل على أنه رابط داخلي
   },
   {
     icon: FaTelegramPlane,
     label: 'تيلغرام',
-    value: '@barqstore',
+    value: '@BaarqStore',
     dir: 'ltr',
-    note: 'دعم مباشر عبر بوت التليغرام',
-    href: 'https://t.me/barqstore',
+    note: 'القناة الرسمية لمتجر برق',
+    href: 'https://t.me/BaarqStore',
     bg: '#229ED9',
-    tag: 'DIRECT',
-  },
-  {
-    icon: FaInstagram,
-    label: 'إنستغرام',
-    value: '@barq.store',
-    dir: 'ltr',
-    note: 'أحدث الباقات والعروض',
-    href: '/products',
-    bg: '#FF3BFF',
-    tag: 'UPDATES',
+    tag: 'CHANNEL',
   },
   {
     icon: Mail,
@@ -89,7 +81,6 @@ export default function ContactPage() {
   const mainRef = useRef(null);
   const [open, setOpen] = useState(0);
   
-  // 🔥 إضافة الحقول الصحيحة للنموذج
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -100,7 +91,6 @@ export default function ContactPage() {
     setIsSubmitting(true);
     
     try {
-      // إرسال البيانات للباك إند (دمج الموضوع مع الرسالة لتصل مرتبة في تيليجرام)
       await api.request('/api/support/message', {
         method: 'POST',
         body: {
@@ -280,17 +270,13 @@ export default function ContactPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* قنوات التواصل */}
-            <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="lg:col-span-5 grid grid-cols-1 gap-5">
               {CHANNELS.map((c, i) => {
                 const Icon = c.icon;
-                return (
-                  <a
-                    key={i}
-                    href={c.href}
-                    target={c.href.startsWith('http') ? '_blank' : undefined}
-                    rel={c.href.startsWith('http') ? 'noreferrer' : undefined}
-                    className="ct-card group relative bg-white border-2 border-black rounded-2xl p-6 shadow-[5px_5px_0px_#000] hover:shadow-[8px_8px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all duration-300 cursor-pointer overflow-hidden"
-                  >
+                
+                // تصميم محتوى الكرت ليكون موحداً
+                const CardContent = (
+                  <>
                     <span className="absolute top-0 right-0 w-14 h-1.5" style={{ background: c.bg }}></span>
                     <div className="flex items-center justify-between">
                       <div
@@ -305,6 +291,27 @@ export default function ContactPage() {
                     <p className="text-sm font-bold text-neutral-700" dir={c.dir || 'rtl'}>{c.value}</p>
                     <p className="text-xs font-medium text-neutral-400 mt-2">{c.note}</p>
                     <ArrowUpRight className="absolute bottom-5 left-5 w-5 h-5 text-neutral-300 group-hover:text-black group-hover:rotate-45 transition-all" />
+                  </>
+                );
+
+                // 🔥 إذا كان داخلياً نستخدم Link، وإذا خارجياً نستخدم a
+                return c.internal ? (
+                  <Link
+                    key={i}
+                    to={c.href}
+                    className="ct-card group relative bg-white border-2 border-black rounded-2xl p-6 shadow-[5px_5px_0px_#000] hover:shadow-[8px_8px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all duration-300 cursor-pointer overflow-hidden block"
+                  >
+                    {CardContent}
+                  </Link>
+                ) : (
+                  <a
+                    key={i}
+                    href={c.href}
+                    target={c.href.startsWith('http') ? '_blank' : undefined}
+                    rel={c.href.startsWith('http') ? 'noreferrer' : undefined}
+                    className="ct-card group relative bg-white border-2 border-black rounded-2xl p-6 shadow-[5px_5px_0px_#000] hover:shadow-[8px_8px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all duration-300 cursor-pointer overflow-hidden block"
+                  >
+                    {CardContent}
                   </a>
                 );
               })}
@@ -330,7 +337,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* الصف الأول: الاسم والإيميل */}
                 <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">اسمك الكريم</label>
@@ -357,7 +363,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* الصف الثاني: الهاتف والموضوع */}
                 <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الهاتف (اختياري)</label>
@@ -479,8 +484,9 @@ export default function ContactPage() {
             راسل الدعم الفني
           </a>
 
+          {/* 🔥 تحديث الروابط في الفوتر */}
           <div className="mt-10 flex items-center justify-center gap-8 font-bold text-sm text-neutral-700">
-            <Link to="/products#platform-instagram" className="hover:text-[#FF3BFF] underline underline-offset-4 transition-colors">إنستغرام</Link>
+            <a href="https://t.me/BaarqStore" target="_blank" rel="noreferrer" className="hover:text-[#229ED9] underline underline-offset-4 transition-colors">تيلغرام</a>
             <a href="https://www.facebook.com/BarqStore11/" target="_blank" rel="noreferrer" className="hover:text-[#407BFF] underline underline-offset-4 transition-colors">فيسبوك</a>
             <Link to="/products#platform-tiktok" className="hover:text-black underline underline-offset-4 transition-colors">تيك توك</Link>
           </div>
