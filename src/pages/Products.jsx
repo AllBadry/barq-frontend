@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // 🔥 تم الإصلاح هنا
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -14,7 +14,7 @@ import { useCart } from '../context/useCart';
 gsap.registerPlugin(ScrollTrigger);
 
 // ==========================================
-// 1. مكون زر الإضافة والبوب-أب (المعدل والمصلح)
+// 1. مكون زر الإضافة والبوب-أب 
 // ==========================================
 function AddToCartButton({ p, g, item }) {
   const { add } = useCart();
@@ -43,7 +43,7 @@ function AddToCartButton({ p, g, item }) {
       <button
         onClick={(e) => {
           e.preventDefault();
-          e.stopPropagation(); // 🔥 يمنع تداخل الضغطة مع خاصية السحب
+          e.stopPropagation();
           setShow(true);
         }}
         aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
@@ -57,7 +57,6 @@ function AddToCartButton({ p, g, item }) {
         {done ? 'أُضيف' : 'أضِف للسلة'}
       </button>
 
-      {/* البوب-أب الخاص بالرابط */}
       {show &&
         createPortal(
           <div
@@ -68,27 +67,29 @@ function AddToCartButton({ p, g, item }) {
               setShow(false);
             }}
           >
+            {/* 🔥 تمت إضافة text-black هنا لضمان وضوح الألوان */}
             <div
-              className="relative w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-8 animate-in fade-in zoom-in duration-200"
+              className="relative w-full max-w-md bg-white text-black border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-8 animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* زر الإغلاق X */}
               <button
                 onClick={() => setShow(false)}
-                className="absolute top-4 right-4 text-neutral-400 hover:text-black transition-colors"
+                className="absolute top-4 right-4 text-neutral-500 hover:text-black transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h3 className="text-2xl font-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
-              <p className="mt-2 text-sm font-bold text-neutral-500 bg-neutral-100 p-2 rounded border border-neutral-200">
+              <h3 className="text-2xl font-black text-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
+              
+              <p className="mt-3 text-sm font-bold text-neutral-800 bg-neutral-100 p-2.5 rounded border border-neutral-200">
                 {item.qty} {g.cat} — {p.name}
                 {g.sub ? ` (${g.sub})` : ''}
               </p>
               
-              <label className="mt-5 block text-[11px] font-black uppercase tracking-widest text-neutral-500">
+              <label className="mt-5 block text-[11px] font-black uppercase tracking-widest text-neutral-600">
                 {guide.label}
               </label>
+              
               <input
                 value={link}
                 onChange={(e) => {
@@ -98,8 +99,9 @@ function AddToCartButton({ p, g, item }) {
                 dir="ltr"
                 autoFocus
                 placeholder={guide.placeholder}
-                className="mt-1.5 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-shadow"
+                className="mt-1.5 w-full bg-white text-black placeholder:text-neutral-400 border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-shadow"
               />
+              
               <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">
                 {guide.hint}
               </p>
@@ -111,7 +113,7 @@ function AddToCartButton({ p, g, item }) {
                   onClick={confirm}
                   className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3.5 border-2 border-black hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]"
                 >
-                  تأكيد وإضافة للسلة
+                  تأكيد وإضافة
                 </button>
                 <button
                   onClick={() => setShow(false)}
