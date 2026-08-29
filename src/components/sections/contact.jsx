@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Send, MessageCircle, Mail, ArrowUpRight, Check } from 'lucide-react';
-import { FaTelegramPlane, FaInstagram } from 'react-icons/fa';
+import { FaTelegramPlane ,} from 'react-icons/fa';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,18 +21,10 @@ const CHANNELS = [
   {
     icon: FaTelegramPlane,
     label: 'تيلغرام',
-    value: '@barqstore',
+    value: '@BaarqStore',
     note: 'دعم مباشر عبر بوت التليغرام',
-    href: '#contact-form',
+    href: 't.me/BaarqStore',
     bg: '#229ED9',
-  },
-  {
-    icon: FaInstagram,
-    label: 'إنستغرام',
-    value: '@barq.store',
-    note: 'أحدث الباقات والعروض',
-    href: '#',
-    bg: '#FF3BFF',
   },
   {
     icon: Mail,
@@ -72,7 +64,7 @@ const [isLoading, setIsLoading] = useState(false);
   try {
     // إرسال الطلب إلى الباك إند الخاص بك
     // تأكد من تغيير الرابط إذا كان الباك إند على رابط مختلف (مثل https://api.barqstore.org)
-    const response = await fetch('http://lapi.barqstore.org/api/tickets', {
+    const response = await fetch('http://api.barqstore.org/api/tickets', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
