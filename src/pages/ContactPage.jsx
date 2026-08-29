@@ -89,7 +89,8 @@ export default function ContactPage() {
   const mainRef = useRef(null);
   const [open, setOpen] = useState(0);
   
-  const [formData, setFormData] = useState({ name: '', phone: '', service: '', message: '' });
+  // 🔥 إضافة الحقول الصحيحة للنموذج
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const { showPopup } = usePopup();
@@ -99,19 +100,24 @@ export default function ContactPage() {
     setIsSubmitting(true);
     
     try {
-      // 🔥 توجيه الطلب إلى المسار المستقل للزوار بدلاً من التذاكر
+      // إرسال البيانات للباك إند (دمج الموضوع مع الرسالة لتصل مرتبة في تيليجرام)
       await api.request('/api/support/message', {
         method: 'POST',
-        body: formData, 
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.subject ? `📌 الموضوع: ${formData.subject}\n\n💬 التفاصيل: ${formData.message}` : formData.message
+        }, 
       });
 
       setSent(true);
-      setFormData({ name: '', phone: '', email: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       
       showPopup({
         type: 'success',
         title: 'تم إرسال رسالتك! 🚀',
-        text: 'تم تحويل استفسارك إلى فريقنا، وسنتواصل معك قريباً عبر الهاتف أو الإيميل.',
+        text: 'تم تحويل استفسارك إلى فريقنا، وسنتواصل معك قريباً عبر البريد الإلكتروني أو الهاتف.',
       });
 
       setTimeout(() => setSent(false), 4000);
@@ -187,8 +193,8 @@ export default function ContactPage() {
     >
       <Navbar />
       <Seo
-        title="تواصل معنا | متجر برق — اطلب باقتك الآن"
-        description="تواصل مع فريق متجر برق عبر نظام الدعم الفني أو النموذج المباشر — متابعون ومشاهدات ولايكات لإنستغرام وفيسبوك وتيك توك."
+        title="تواصل معنا | متجر برق"
+        description="تواصل مع فريق متجر برق للاستفسارات العامة، الدعم الفني، أو الشراكات."
         path="/contact"
       />
 
@@ -213,11 +219,10 @@ export default function ContactPage() {
             CONTACT — التواصل
           </span>
 
-          {/* 🔥 الحل السحري: pt-8 و pb-8 مع إعطاء العنصر block لسحب المربع بالكامل */}
           <h1 className="mt-8 leading-loose tracking-tighter">
             <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-black pt-4 pb-2">راسلنا</span>
             <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] pt-8 pb-8 -mt-6">
-              وفر، وابدأ
+              وفّر، وابدأ
             </span>
           </h1>
 
@@ -321,10 +326,11 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="text-xl font-black">راسلنا مباشرة</h4>
-                    <p className="text-xs font-bold text-neutral-500">نرد عليك خلال دقائق في أوقات العمل</p>
+                    <p className="text-xs font-bold text-neutral-500">للاستفسارات العامة، الدعم، أو الشراكات</p>
                   </div>
                 </div>
 
+                {/* الصف الأول: الاسم والإيميل */}
                 <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">اسمك الكريم</label>
@@ -338,9 +344,24 @@ export default function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الهاتف</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">البريد الإلكتروني</label>
                     <input
                       required
+                      type="email"
+                      placeholder="example@mail.com"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                {/* الصف الثاني: الهاتف والموضوع */}
+                <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الهاتف (اختياري)</label>
+                    <input
                       type="text"
                       pattern="[0-9+\(\)\- ]*"
                       placeholder="07XXXXXXXX"
@@ -350,23 +371,23 @@ export default function ContactPage() {
                       dir="ltr"
                     />
                   </div>
-                </div>
-
-                <div className="relative mt-5">
-                  <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">الخدمة المطلوبة (اختياري)</label>
-                  <input
-                    type="text"
-                    placeholder="مثال: 5000 متابع إنستغرام مع ضمان"
-                    value={formData.service}
-                    onChange={e => setFormData({...formData, service: e.target.value})}
-                    className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-all"
-                  />
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">الموضوع</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="استفسار عام، شراكة، إلخ..."
+                      value={formData.subject}
+                      onChange={e => setFormData({...formData, subject: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-all"
+                    />
+                  </div>
                 </div>
 
                 <textarea
                   required
                   rows="4"
-                  placeholder="اكتب استفسارك أو تفاصيل طلبك..."
+                  placeholder="اكتب استفسارك هنا بكل وضوح وسنرد عليك في أقرب وقت..."
                   value={formData.message}
                   onChange={e => setFormData({...formData, message: e.target.value})}
                   className="relative w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all mt-5 resize-none"
@@ -385,7 +406,7 @@ export default function ContactPage() {
                     ) : sent ? (
                       <><Check className="w-5 h-5" /> تم استلام رسالتك</>
                     ) : (
-                      <><Send className="w-5 h-5" /> أرسل الاستفسار</>
+                      <><Send className="w-5 h-5" /> إرسال الاستفسار</>
                     )}
                   </button>
                   <span className="text-xs font-bold text-neutral-500 text-center sm:text-right">
@@ -407,7 +428,6 @@ export default function ContactPage() {
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500">FAQ — أسئلة شائعة</span>
           </div>
 
-          {/* 🔥 التعديل هنا: inline-block مع Padding يحمي النص المتدرج من القص */}
           <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-loose">
             عندك سؤال؟ <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] inline-block pt-6 pb-6 -mb-6">جاوبناه.</span>
           </h2>
@@ -444,7 +464,6 @@ export default function ContactPage() {
       {/* ============ خاتمة ============ */}
       <section className="relative bg-white overflow-hidden pt-20 md:pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          {/* 🔥 التعديل هنا: inline-block مع Padding يحمي الحروف الممتدة من الأسفل والأعلى */}
           <h2 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-loose">
             النسخة التالية من <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] inline-block pt-6 pb-6 -mb-6">حضورك</span>
           </h2>
