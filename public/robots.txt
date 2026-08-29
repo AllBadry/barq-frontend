@@ -4,5 +4,6 @@ Allow: /
 Disallow: /auth
 Disallow: /cart
 Disallow: /profile
+Disallow: /checkout
 
 Sitemap: https://barqstore.org/sitemap.xml

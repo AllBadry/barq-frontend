@@ -69,7 +69,12 @@ export default function CheckoutPage() {
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
-      <Seo title="إتمام الطلب | متجر برق" path="/checkout" noindex />
+      <Seo
+        title="إتمام الطلب | متجر برق"
+        description="راجع تفاصيل طلبك وأكمل عملية الدفع بأمان في متجر برق — تفعيل فوري وضمان كامل."
+        path="/checkout"
+        noindex
+      />
       <div className="relative max-w-3xl mx-auto px-6 pt-32 md:pt-40 pb-20">
         <Link to="/cart" className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest hover:text-[#407BFF]">
           <ArrowLeft className="w-4 h-4" /> العودة للسلة
