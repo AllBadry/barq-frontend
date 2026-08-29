@@ -136,7 +136,7 @@ export default function AboutUs() {
         <section className="cinematic-section relative flex flex-col md:flex-row min-h-[80vh] border-b-4 border-white/10">
           <div className="w-full md:w-1/2 relative overflow-hidden border-r-4 border-white/10">
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/40 to-transparent z-10" />
-            <img src="/instamanpng.png" alt="Instagram Dominance" className="cine-img w-full h-full object-cover object-center" />
+            <img src="/instamanwebp.webp" alt="Instagram Dominance" className="cine-img w-full h-full object-cover object-center" />
           </div>
           <div className="cine-content w-full md:w-1/2 flex flex-col justify-center p-10 md:p-20 bg-black z-20">
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-[#FF3BFF] uppercase mb-6" dir="ltr">Instagram</h2>
@@ -154,7 +154,7 @@ export default function AboutUs() {
         <section className="cinematic-section reverse relative flex flex-col md:flex-row-reverse min-h-[80vh] border-b-4 border-white/10 bg-[#0a0a0a]">
           <div className="w-full md:w-1/2 relative overflow-hidden border-l-4 border-white/10">
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent z-10" />
-            <img src="/tiktokman.png" alt="TikTok Viral" className="cine-img w-full h-full object-cover object-top" />
+            <img src="/tiktokman.webp" alt="TikTok Viral" className="cine-img w-full h-full object-cover object-top" />
           </div>
           <div className="cine-content w-full md:w-1/2 flex flex-col justify-center p-10 md:p-20 z-20">
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-[#25F4EE] uppercase mb-6" dir="ltr">TikTok</h2>
@@ -172,7 +172,7 @@ export default function AboutUs() {
         <section className="cinematic-section relative flex flex-col md:flex-row min-h-[80vh]">
           <div className="w-full md:w-1/2 relative overflow-hidden border-r-4 border-white/10">
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/40 to-transparent z-10" />
-            <img src="/facebookcity.png" alt="Facebook Community" className="cine-img w-full h-full object-cover object-center" />
+            <img src="/facebookcity.webp" alt="Facebook Community" className="cine-img w-full h-full object-cover object-center" />
           </div>
           <div className="cine-content w-full md:w-1/2 flex flex-col justify-center p-10 md:p-20 bg-black z-20">
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-[#407BFF] uppercase mb-6" dir="ltr">Facebook</h2>

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const SITE = 'https://barqstore.org';
-const DEFAULT_IMAGE = `${SITE}/zap.png`;
+const DEFAULT_IMAGE = `${SITE}/zap.webp`;
 
 function upsertMeta(matchSelector, attrs, content) {
   const el = document.head.querySelector(matchSelector) || (() => {

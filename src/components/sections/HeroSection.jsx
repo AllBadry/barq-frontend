@@ -111,11 +111,11 @@ export default function HeroSection() {
         >
           BAR
           <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.png" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+            <img src="/mann.webp" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
           </span>
           <span className="hero-text-part">ST</span>
           <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.png" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+            <img src="/mann.webp" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
           </span>
           <span className="hero-text-part">RE</span>
         </h1>
@@ -186,7 +186,7 @@ export default function HeroSection() {
 
         <div className="main-character relative z-20 w-[80%] sm:w-[55%] md:w-[40%] max-w-[550px] flex justify-center mt-[-100px] sm:mt-[-210px] md:mt-[-260px]">
           <img 
-            src="/mann.png" 
+            src="/mann.webp" 
             alt="Hero Character" 
             loading="lazy"
             decoding="async"
