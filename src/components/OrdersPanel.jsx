@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Loader2, UploadCloud, Calendar, Package, CheckCircle2, Clock3, XCircle, ExternalLink } from 'lucide-react';
+import { Loader2, UploadCloud, Calendar, Package, CheckCircle2, Clock3, XCircle, ExternalLink, X } from 'lucide-react';
 import { usePopup } from '../context/usePopup';
 
 const statusLabel = (o) => {
@@ -33,13 +33,8 @@ function EmptyState() {
   );
 }
 
-// نموذج رفع الإيصال — يُعرض داخل البوب-أب العام
-function ReceiptForm({
-  data,
-  setData,
-  isSubmitting,
-  onSubmit,
-}) {
+// نموذج رفع الإيصال (بدون تغيير)
+function ReceiptForm({ data, setData, isSubmitting, onSubmit }) {
   return (
     <form id="receipt-form" onSubmit={onSubmit} className="space-y-4 mt-4">
       <div>
@@ -83,10 +78,7 @@ function ReceiptForm({
         className="w-full flex items-center justify-center gap-2 bg-black text-white py-3.5 border-2 border-black font-black uppercase tracking-widest hover:bg-[#e4f542] hover:text-black transition-colors shadow-[4px_4px_0px_#000] disabled:opacity-70"
       >
         {isSubmitting ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            جاري الإرسال...
-          </>
+          <><Loader2 className="w-5 h-5 animate-spin" /> جاري الإرسال...</>
         ) : 'إرسال للتأكيد'}
       </button>
     </form>
@@ -96,10 +88,14 @@ function ReceiptForm({
 export default function OrdersPanel() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [orderId, setOrderId] = useState(null);
+  
+  // متغيرات البوب-أب المحلي الخاص بالنموذج
+  const [uploadOrderId, setUploadOrderId] = useState(null);
   const [uploadData, setUploadData] = useState({ name: '', email: '', file: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showPopup, hidePopup } = usePopup();
+  
+  // استدعاء نظام التنبيهات العالمي
+  const { showPopup } = usePopup();
 
   const load = () => {
     api.request('/api/orders/my-orders')
@@ -108,41 +104,19 @@ export default function OrdersPanel() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  const openReceipt = (id) => {
-    setOrderId(id);
+  const openReceiptModal = (id) => {
+    setUploadOrderId(id);
     setUploadData({ name: '', email: '', file: null });
-    showPopup({
-      title: 'إتمام الدفع',
-      content: (
-        <ReceiptForm
-          data={uploadData}
-          setData={setUploadData}
-          isSubmitting={isSubmitting}
-          onSubmit={submitReceipt}
-        />
-      ),
-      onCancel: () => {
-        setOrderId(null);
-        setUploadData({ name: '', email: '', file: null });
-      },
-      cancelText: 'إلغاء',
-    });
   };
 
-  // دالة إرسال الإيصال والبيانات
+  // دالة الإرسال
   const submitReceipt = async (e) => {
     e.preventDefault();
     if (!uploadData.file) {
-      showPopup({
-        type: 'warning',
-        title: 'صورة الحوالة مطلوبة',
-        text: 'الرجاء اختيار صورة حوالة كليك (CliQ) أولاً.',
-        cancelText: 'حسناً',
-      });
+      // استخدام النظام العالمي للتنبيه
+      showPopup({ type: 'warning', title: 'تنبيه', text: 'الرجاء اختيار صورة حوالة كليك (CliQ) أولاً.' });
       return;
     }
 
@@ -153,29 +127,27 @@ export default function OrdersPanel() {
     if (uploadData.email) formData.append('email', uploadData.email);
 
     try {
-      await api.request(`/api/orders/${orderId}/receipt`, {
-        method: 'POST',
-        body: formData,
-      });
+      await api.request(`/api/orders/${uploadOrderId}/receipt`, { method: 'POST', body: formData });
 
-      hidePopup();
-      setOrderId(null);
+      setUploadOrderId(null); // إغلاق النموذج المحلي
       setUploadData({ name: '', email: '', file: null });
-      load();
+      load(); // تحديث الطلبات
+      
+      // إظهار رسالة النجاح عبر النظام العالمي
       showPopup({
         type: 'success',
-        title: 'تم إرسال إيصالك بنجاح!',
-        text: 'سيقوم الأدمن بمراجعته وتفعيل طلبك فوراً. 🎉',
-        cancelText: 'رائع',
+        title: 'تمت العملية بنجاح!',
+        text: 'تم إرسال إيصالك وسيقوم فريقنا بتفعيل طلبك فوراً. 🎉',
       });
     } catch (err) {
-      setIsSubmitting(false);
+      // إظهار رسالة الخطأ عبر النظام العالمي
       showPopup({
         type: 'error',
-        title: 'فشل رفع الإيصال',
-        text: err.message || 'الرجاء المحاولة مرة أخرى.',
-        cancelText: 'إغلاق',
+        title: 'حدث خطأ',
+        text: err.message || 'فشل رفع الإيصال، الرجاء المحاولة مرة أخرى.',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -196,9 +168,7 @@ export default function OrdersPanel() {
 
         return (
           <div key={o._id} className="border-2 border-black shadow-[6px_6px_0px_#000] bg-white relative overflow-hidden">
-            {/* شريط علوي مشطوف ملون حسب الحالة */}
             <div className={`h-2 w-full ${s.c} border-b-2 border-black`} />
-
             <div className="p-4 md:p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -248,7 +218,7 @@ export default function OrdersPanel() {
 
                 {o.paymentStatus !== 'paid' && o.paymentStatus !== 'rejected' && o.paymentStatus !== 'pending_review' && (
                   <button
-                    onClick={() => openReceipt(o._id)}
+                    onClick={() => openReceiptModal(o._id)}
                     className="bg-[#e4f542] text-black text-sm font-black px-5 py-3 border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] transition-all flex items-center justify-center gap-2"
                   >
                     <UploadCloud className="w-4 h-4" />
@@ -260,6 +230,33 @@ export default function OrdersPanel() {
           </div>
         );
       })}
+
+      {/* بوب-أب محلي (Local Modal) للنموذج فقط */}
+      {uploadOrderId && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" dir="rtl">
+          <div className="relative w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-8 animate-in fade-in zoom-in duration-200">
+            {/* زر إغلاق الـ Modal المحلي */}
+            <button 
+              onClick={() => setUploadOrderId(null)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-black transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <h3 className="text-2xl font-black tracking-tighter mb-2">إتمام الدفع</h3>
+            <p className="text-xs font-bold text-neutral-500 mb-2 leading-relaxed">
+              يرجى إرفاق صورة لحوالة كليك (CliQ) لإتمام الطلب.
+            </p>
+
+            <ReceiptForm
+              data={uploadData}
+              setData={setUploadData}
+              isSubmitting={isSubmitting}
+              onSubmit={submitReceipt}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
