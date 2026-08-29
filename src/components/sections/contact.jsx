@@ -10,11 +10,7 @@ import { Loader2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEAD_WORDS = ['خطك', 'المباشر', 'مع', 'برق'];
-const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [sent, setSent] = useState(false);
-const { showPopup } = usePopup();
+
 
 const CHANNELS = [
   {
@@ -51,8 +47,12 @@ const FLOATERS = [
 ];
 
 export default function Contact() {
+  const HEAD_WORDS = ['خطك', 'المباشر', 'مع', 'برق'];
+const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [sent, setSent] = useState(false);
+const { showPopup } = usePopup();
   const containerRef = useRef(null);
-  const [sent, setSent] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
 
 const handleSubmit = async (e) => {
