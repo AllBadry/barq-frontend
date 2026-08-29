@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { User, Mail, Phone, Lock, Save, LogOut, Check, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { User, Mail, Phone, Lock, Save, LogOut, Check, ShieldCheck, ShoppingCart, UserRound, ShoppingBag, Headset, Bell } from 'lucide-react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -294,15 +294,19 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
   );
 }
 
-function TabBtn({ active, onClick, label }) {
+function TabBtn({ active, onClick, label, children }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-black whitespace-nowrap shrink-0 transition-colors ${
-        active ? 'bg-black text-white' : 'bg-white text-black hover:bg-neutral-100'
+      className={`relative flex items-center gap-2 px-4 py-2.5 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-black whitespace-nowrap shrink-0 transition-all duration-200 ${
+        active
+          ? 'bg-[#e4f542] text-black shadow-[3px_3px_0px_#000] -translate-y-0.5'
+          : 'bg-white text-black hover:bg-neutral-100 hover:shadow-[3px_3px_0px_#000]'
       }`}
     >
+      {children}
       {label}
+      {active && <span className="absolute -bottom-[3px] right-0 left-0 h-[3px] bg-black" />}
     </button>
   );
 }
@@ -327,10 +331,10 @@ export default function ProfilePage() {
       {/* التعديل الأهم هنا: إزاحة التابات للأسفل لتبتعد عن الناف بار (top-[72px] md:top-[88px]) 
           مع z-[40] لتنزلق تحت الناف بار عند التمرير، وإخفاء شريط التمرير لأناقة أكثر */}
       <div className="fixed top-[72px] md:top-[88px] left-0 right-0 z-[40] flex gap-2 overflow-x-auto bg-white/95 backdrop-blur-md border-b-2 border-black px-6 py-3 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} label="الملف الشخصي" />
-        <TabBtn active={tab === 'orders'} onClick={() => setTab('orders')} label="طلباتي" />
-        <TabBtn active={tab === 'support'} onClick={() => setTab('support')} label="الدعم الفني" />
-        <TabBtn active={tab === 'notifications'} onClick={() => setTab('notifications')} label="الإشعارات" />
+        <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} label="الملف الشخصي"><UserRound className="w-4 h-4" /></TabBtn>
+        <TabBtn active={tab === 'orders'} onClick={() => setTab('orders')} label="طلباتي"><ShoppingBag className="w-4 h-4" /></TabBtn>
+        <TabBtn active={tab === 'support'} onClick={() => setTab('support')} label="الدعم الفني"><Headset className="w-4 h-4" /></TabBtn>
+        <TabBtn active={tab === 'notifications'} onClick={() => setTab('notifications')} label="الإشعارات"><Bell className="w-4 h-4" /></TabBtn>
       </div>
 
       {tab === 'profile' && (
@@ -368,10 +372,21 @@ function PanelPage({ title, children }) {
   return (
     <main dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
-      {/* التعديل هنا أيضاً: زيادة الـ Padding العلوي (pt-40 md:pt-48) */}
       <div className="relative max-w-3xl mx-auto px-6 pt-40 md:pt-48 pb-20">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter">{title}</h1>
-        <div className="mt-8">{children}</div>
+        <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true"></div>
+        <div className="relative">
+          <p className="text-[10px] font-mono font-black tracking-[0.35em] uppercase text-neutral-400" dir="ltr">
+            BARQ / MY DASHBOARD
+          </p>
+          <h1 className="mt-3 text-4xl md:text-5xl font-black tracking-tighter leading-none">
+            {title}
+            <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] to-[#FF3BFF]">
+              كل ما يخص حسابك
+            </span>
+          </h1>
+          <div className="mt-5 w-20 h-1.5 bg-black" />
+        </div>
+        <div className="relative mt-8">{children}</div>
       </div>
       <Footer />
     </main>
