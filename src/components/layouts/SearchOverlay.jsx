@@ -2,12 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Search, X, Zap, CornerDownLeft, ArrowRight, ShoppingCart, Check, Loader2 } from 'lucide-react';
-import { api } from '../../lib/api'; // استدعاء API متجر برق
+import { api } from '../../lib/api';
 import AddToCartButton from '../AddToCartButton';
+
+// اقتراحات سريعة جاهزة للضغط الفوري
+const SUGGESTIONS = [
+  { label: '🔥 متابعون إنستغرام', q: 'متابعون إنستغرام' },
+  { label: '⚡ مشاهدات ريلز', q: 'مشاهدات' },
+  { label: '💎 متابعون ضمان', q: 'مع ضمان' },
+  { label: '🚀 تيك توك', q: 'تيك توك' },
+  { label: '💙 فيسبوك', q: 'فيسبوك' },
+  { label: '✨ لايكات', q: 'لايكات' },
+];
 
 // مكون عرض صف النتيجة الفردي
 function ResultRow({ product }) {
-  // مطابقة بيانات المنتج القادمة من الداتا بيز مع ما يحتاجه زر السلة
   const category = product.category || { name: 'متجر برق', enName: 'STORE', color: '#407BFF', dark: '#1d4ed8' };
   
   const formattedPlatform = {
@@ -67,7 +76,24 @@ export default function SearchOverlay({ onClose }) {
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [popularProducts, setPopularProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // جلب المنتجات الأكثر طلباً (أو الافتراضية) من السيرفر عند فتح النافذة
+  useEffect(() => {
+    const fetchPopular = async () => {
+      try {
+        const res = await api.request('/api/products', { method: 'GET' });
+        if (res && res.data && res.data.products) {
+          // جلب أول 5 منتجات لعرضها في قائمة الأكثر طلباً
+          setPopularProducts(res.data.products.slice(0, 5));
+        }
+      } catch (err) {
+        console.error('فشل جلب المنتجات الافتراضية:', err);
+      }
+    };
+    fetchPopular();
+  }, []);
 
   // أنيميشن الفتح والإغلاق
   useGSAP(() => {
@@ -89,7 +115,7 @@ export default function SearchOverlay({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // جلب النتائج من الباك إند مع تأخير زمني (Debounce) لمنع الطلبات المفرطة
+  // البحث الحي في السيرفر مع تأخير زمني (Debounce)
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
@@ -109,12 +135,12 @@ export default function SearchOverlay({ onClose }) {
       } finally {
         setLoading(false);
       }
-    }, 300); // تأخير 300 ملي ثانية أثناء الكتابة
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [query]);
 
-  // أنيميشن ظهور النتائج عند تغيرها
+  // أنيميشن ظهور النتائج
   useEffect(() => {
     if (listRef.current) {
       gsap.fromTo(
@@ -123,9 +149,10 @@ export default function SearchOverlay({ onClose }) {
         { y: 0, opacity: 1, duration: 0.45, stagger: 0.04, ease: 'power3.out', overwrite: true }
       );
     }
-  }, [results, query]);
+  }, [results, query, popularProducts]);
 
   const showSuggestions = query.trim() === '';
+  const displayList = showSuggestions ? popularProducts : results;
 
   return (
     <div ref={rootRef} dir="rtl" className="fixed inset-0 z-[130] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 md:pt-28 px-4" role="dialog" aria-modal="true">
@@ -180,42 +207,60 @@ export default function SearchOverlay({ onClose }) {
           </kbd>
         </div>
 
-        {/* النتائج والمحتوى */}
-        <div ref={listRef} className="overflow-y-auto flex-1 p-4">
-          {showSuggestions ? (
-            <div className="py-8 text-center text-neutral-400">
-              <p className="text-xs font-bold uppercase tracking-widest">ابدأ الكتابة للبحث عن الباقات في قاعدة البيانات...</p>
-            </div>
-          ) : results.length > 0 ? (
-            <div>
-              <p className="px-2 pb-2 text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">
-                {results.length} نتيجة مطابقة لـ «{query}»
-              </p>
-              <div className="border-2 border-black divide-y-2 divide-black/10">
-                {results.map((product) => (
-                  <ResultRow key={product._id} product={product} />
+        {/* المحتوى (الاقتراحات والنتائج) */}
+        <div ref={listRef} className="overflow-y-auto flex-1">
+          {showSuggestions && (
+            <div className="px-5 pt-4">
+              <p className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">اقتراحات سريعة</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s.q}
+                    onClick={() => setQuery(s.q)}
+                    className="px-3 py-1.5 border-2 border-black text-[11px] font-black shadow-[2px_2px_0px_#000] hover:bg-[#e4f542] transition-colors"
+                  >
+                    {s.label}
+                  </button>
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className="grid place-items-center h-full py-16 text-center px-6">
-              <div>
-                <span className="inline-flex w-16 h-16 items-center justify-center border-4 border-dashed border-black/20 text-3xl">
-                  ∅
-                </span>
-                <p className="mt-4 font-black text-lg">لا توجد نتائج لـ «{query}»</p>
-                <p className="mt-1 text-sm font-bold text-neutral-500">تأكد من كتابة الكلمة بشكل صحيح أو جرّب كلمات أخرى.</p>
-              </div>
+              <p className="mt-5 text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">الأكثر طلباً</p>
             </div>
           )}
+
+          <div className="p-5 pt-3">
+            {displayList.length > 0 ? (
+              <div>
+                {!showSuggestions && (
+                  <p className="px-2 pb-2 text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">
+                    {displayList.length} نتيجة مطابقة لـ «{query}»
+                  </p>
+                )}
+                <div className="border-2 border-black divide-y-2 divide-black/10">
+                  {displayList.map((product) => (
+                    <ResultRow key={product._id} product={product} />
+                  ))}
+                </div>
+              </div>
+            ) : !showSuggestions ? (
+              <div className="grid place-items-center h-full py-16 text-center px-6">
+                <div>
+                  <span className="inline-flex w-16 h-16 items-center justify-center border-4 border-dashed border-black/20 text-3xl">
+                    ∅
+                  </span>
+                  <p className="mt-4 font-black text-lg">لا توجد نتائج لـ «{query}»</p>
+                  <p className="mt-1 text-sm font-bold text-neutral-500">تأكد من كتابة الكلمة بشكل صحيح أو جرّب كلمات أخرى.</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {/* التذييل */}
         <div className="px-5 py-3 border-t-2 border-black flex items-center justify-between text-[10px] font-mono font-black tracking-widest uppercase text-neutral-400 bg-neutral-50">
-          <span>BARQ LIVE SEARCH</span>
+          <span>BARQ SEARCH v2.0</span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 bg-[#25D366] rounded-full animate-pulse"></span>
-            متصل بقاعدة البيانات
+            متصل بالداتا بيز
           </span>
         </div>
       </div>
