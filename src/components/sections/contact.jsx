@@ -54,12 +54,47 @@ const FLOATERS = [
 export default function Contact() {
   const containerRef = useRef(null);
   const [sent, setSent] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  // سحب البيانات من الحقول
+  const formData = new FormData(e.target);
+  const data = {
+    name: formData.get('name'),
+    email: formData.get('email'), // استخدمنا حقل الهاتف/الإيميل
+    subject: formData.get('subject') || 'استفسار من صفحة التواصل',
+    message: formData.get('message'),
   };
+
+  try {
+    // إرسال الطلب إلى الباك إند الخاص بك
+    // تأكد من تغيير الرابط إذا كان الباك إند على رابط مختلف (مثل https://api.barqstore.org)
+    const response = await fetch('http://lapi.barqstore.org/api/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      setSent(true);
+      e.target.reset(); // تفريغ الحقول بعد النجاح
+      setTimeout(() => setSent(false), 4000);
+    } else {
+      const errorData = await response.json();
+      alert('خطأ: ' + (errorData.message || 'لم يتم الإرسال'));
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+    alert('حدث خطأ في الاتصال بالسيرفر.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useGSAP(() => {
     gsap.fromTo(
@@ -194,19 +229,27 @@ export default function Contact() {
                 <input
                   required
                   type="text"
+                  name="name"
                   placeholder="اسمك الكريم"
                   className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#407BFF] transition-all"
                 />
                 <input
+  type="text"
+  name="subject" // تمت الإضافة
+  placeholder="مثال: 5000 متابع إنستغرام مع ضمان"
+  className="..."
+/>
+                <input
                   required
-                  type="text"
-                  pattern="[0-9+\(\)\- ]*"
-                  placeholder="رقم الهاتف"
+                  type="email"
+                  name="email"
+                  placeholder="البريد الإلكتروني"
                   className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
                 />
               </div>
               <textarea
                 required
+                name="message"
                 rows="4"
                 placeholder="اكتب استفسارك أو الخدمة التي تريدها..."
                 className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all mt-5 resize-none"
