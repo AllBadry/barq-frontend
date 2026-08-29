@@ -363,7 +363,7 @@ export default function AboutUs() {
             </Link>
             <span className="inline-flex items-center gap-2 text-xs font-bold text-neutral-500">
               <ShieldCheck className="w-4 h-4 text-[#e4f542]" />
-              أسعار بالدينار الأردني · دفع عبر واتساب
+              أسعار بالدينار الأردني · دفع آمن عبر بنك الاتحاد
             </span>
           </div>
         </div>

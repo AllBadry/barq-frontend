@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ShoppingCart, Plus, Minus, Trash2, Zap, ArrowLeft, ShieldCheck } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
 import { useCart } from '../context/useCart';
 import { useAuth } from '../context/useAuth';
-import { PLATFORMS, WA } from '../data/products';
+import { PLATFORMS } from '../data/products';
 
 function CartEntry({ item, index }) {
   const { setCount, remove } = useCart();
@@ -34,6 +33,11 @@ function CartEntry({ item, index }) {
           {item.qty} {item.cat} — {item.platformName}
           {item.sub ? <span className="text-neutral-500 font-bold"> ({item.sub})</span> : null}
         </h3>
+        {item.link ? (
+          <p className="mt-0.5 text-[11px] font-bold text-[#1d4ed8] truncate" dir="ltr">
+            ↳ {item.link}
+          </p>
+        ) : null}
         <p className="mt-0.5 text-lg font-black tabular-nums" dir="ltr">
           {item.price}
           <span className="text-[10px] font-black text-neutral-500 mr-1">JOD</span>
@@ -91,29 +95,12 @@ export default function CartPage() {
     );
   }, { scope: pageRef, dependencies: [items.length] });
 
-  const checkoutHref = () => {
-    const lines = items.map(
-      (it, i) =>
-        `${i + 1}) ${it.qty} ${it.cat} — ${it.platformName}${it.sub ? ` (${it.sub})` : ''} — ${it.price} JOD${it.count > 1 ? ` ×${it.count}` : ''}`
-    );
-    const msg = [
-      'مرحباً برق، أريد إتمام طلب من السلة:',
-      ...lines,
-      '',
-      `الإجمالي: ${total.toFixed(2)} JOD`,
-      ...(user
-        ? ['', `الاسم: ${user.name}`, `واتساب: ${user.phone || 'غير مضاف'}`, `الإيميل: ${user.email}`]
-        : []),
-    ].join('\n');
-    return `${WA}?text=${encodeURIComponent(msg)}`;
-  };
-
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
       <Seo
         title="سلة المشتريات | متجر برق"
-        description="سلة مشترياتك في متجر برق — مراجعة طلباتك وإتمامها بضغطة واحدة عبر واتساب."
+        description="سلة مشترياتك في متجر برق — مراجعة طلباتك وإتمامها عبر الدفع البنكي بضغطة واحدة."
         path="/cart"
         noindex
       />
@@ -158,7 +145,7 @@ export default function CartPage() {
               {/* المنتجات */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-[11px] font-mono font-black tracking-widest uppercase text-neutral-400 px-1">
-                  <span>Add to cart → check_out via whatsapp</span>
+                  <span>Add to cart → أدخل الرابط → check_out</span>
                   <button
                     onClick={clear}
                     className="flex items-center gap-1.5 text-black hover:text-red-600 transition-colors font-sans"
@@ -194,15 +181,13 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <a
-                  href={checkoutHref()}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-[#25D366] text-black text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#1db954] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200"
+                <Link
+                  to="/checkout"
+                  className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#407BFF] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  <FaWhatsapp className="w-5 h-5" />
-                  إتمام الطلب عبر واتساب
-                </a>
+                  <ShoppingCart className="w-5 h-5" />
+                  إتمام الطلب عبر بنك الاتحاد
+                </Link>
 
                 <p className="mt-4 text-[11px] font-bold text-neutral-500 leading-relaxed">
                   {user ? (

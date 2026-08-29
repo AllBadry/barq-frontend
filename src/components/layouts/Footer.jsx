@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
 import { Zap, ArrowUp, ArrowUpRight, Mail, Clock } from 'lucide-react';
-import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
+import { FaTelegramPlane, FaInstagram, FaFacebookF, FaTiktok, FaPhone } from 'react-icons/fa';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,14 +23,13 @@ const PLATFORMS = [
 ];
 
 const CONTACTS = [
-  { icon: FaWhatsapp, label: 'واتساب', value: '0785151865', href: 'https://wa.me/962785151865' },
+  { icon: FaPhone, label: 'رقم الهاتف', value: '0785151865', href: 'tel:962785151865' },
   { icon: FaTelegramPlane, label: 'تيلغرام', value: '@barqstore', href: '/contact#contact-form' },
   { icon: Mail, label: 'البريد الإلكتروني', value: 'support@barqstore.org', href: 'mailto:support@barqstore.org' },
   { icon: Clock, label: 'الدعم الفني', value: 'متاح 24/7 على مدار الأسبوع', href: '/contact' },
 ];
 
 const SOCIALS = [
-  { icon: FaWhatsapp, href: 'https://wa.me/962785151865', label: 'واتساب' },
   { icon: FaInstagram, href: '/products#platform-instagram', label: 'إنستغرام' },
   { icon: FaTelegramPlane, href: '/contact', label: 'تيلغرام' },
 ];

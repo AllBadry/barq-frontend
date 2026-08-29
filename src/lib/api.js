@@ -19,7 +19,9 @@ function setToken(token) {
 }
 
 async function request(path, { method = 'GET', body } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+  const headers = {};
+  if (!isForm) headers['Content-Type'] = 'application/json';
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -27,7 +29,7 @@ async function request(path, { method = 'GET', body } = {}) {
     method,
     headers,
     credentials: 'include',
-    body: body ? JSON.stringify(body) : undefined,
+    body: isForm ? body : body ? JSON.stringify(body) : undefined,
   });
 
   let data = null;

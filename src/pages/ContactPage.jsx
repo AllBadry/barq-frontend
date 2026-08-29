@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
 import { Send, MessageCircle, Mail, ArrowDown, Check, Plus, Zap, ArrowUpRight } from 'lucide-react';
-import { FaWhatsapp, FaTelegramPlane, FaInstagram } from 'react-icons/fa';
+import { FaTelegramPlane, FaInstagram } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -14,21 +14,21 @@ gsap.registerPlugin(ScrollTrigger);
 
 const CHANNELS = [
   {
-    icon: FaWhatsapp,
-    label: 'واتساب',
-    value: '0785151865',
+    icon: MessageCircle,
+    label: 'الدعم الفني',
+    value: 'نظام التذاكر',
     dir: 'ltr',
-    note: 'أسرع وسيلة للرد الفوري',
-    href: 'https://wa.me/962785151865',
-    bg: '#25D366',
-    tag: 'FASTEST',
+    note: 'الطريقة الرسمية للتواصل — مربوطة بالبوت',
+    href: '#contact-form',
+    bg: '#111111',
+    tag: 'SUPPORT',
   },
   {
     icon: FaTelegramPlane,
     label: 'تيلغرام',
     value: '@barqstore',
     dir: 'ltr',
-    note: 'دعم مباشر وقنوات التحديثات',
+    note: 'دعم مباشر عبر بوت التليغرام',
     href: '#contact-form',
     bg: '#229ED9',
     tag: 'DIRECT',
@@ -156,7 +156,7 @@ export default function ContactPage() {
       <Navbar />
       <Seo
         title="تواصل معنا | متجر برق — اطلب باقتك الآن"
-        description="تواصل مع فريق متجر برق عبر واتساب أو النموذج المباشر — متابعون ومشاهدات ولايكات لإنستغرام وفيسبوك وتيك توك."
+        description="تواصل مع فريق متجر برق عبر نظام الدعم الفني أو النموذج المباشر — متابعون ومشاهدات ولايكات لإنستغرام وفيسبوك وتيك توك."
         path="/contact"
       />
 
@@ -303,11 +303,11 @@ export default function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الواتساب</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الهاتف</label>
                     <input
                       required
                       type="text"
-                      pattern="[0-9+() -]*"
+                      pattern="[0-9+\(\)\- ]*"
                       placeholder="07XXXXXXXX"
                       className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
                       dir="ltr"
@@ -413,13 +413,11 @@ export default function ContactPage() {
           </p>
 
           <a
-            href="https://wa.me/962785151865"
-            target="_blank"
-            rel="noreferrer"
+            href="#contact-form"
             className="group mt-10 inline-flex items-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-9 py-5 border-2 border-black shadow-[6px_6px_0px_#e4f542] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-[4px_4px_0px_#e4f542] transition-all duration-200"
           >
-            <FaWhatsapp className="w-5 h-5 text-[#25D366] group-hover:rotate-12 transition-transform" />
-            تواصل عبر واتساب
+            <MessageCircle className="w-5 h-5 text-[#25D366] group-hover:rotate-12 transition-transform" />
+            راسل الدعم الفني
           </a>
 
           <div className="mt-10 flex items-center justify-center gap-8 font-bold text-sm text-neutral-700">

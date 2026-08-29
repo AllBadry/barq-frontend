@@ -10,6 +10,9 @@ import Seo from '../components/Seo';
 import { useAuth } from '../context/useAuth';
 import { useCart } from '../context/useCart';
 import ConfirmDialog from '../components/ConfirmDialog';
+import OrdersPanel from '../components/OrdersPanel';
+import SupportPanel from '../components/SupportPanel';
+import NotificationsPanel from '../components/NotificationsPanel';
 
 function Field({ label, icon, children }) {
   return (
@@ -101,7 +104,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
       <Navbar />
       <Seo
         title="بروفايلي | متجر برق — حساباتك كلها بضغطة"
-        description="بروفايلك في متجر برق — عدّل اسمك ورقم واتسابك، وبريدك الإلكتروني يبقى ثابتاً."
+        description="بروفايلك في متجر برق — عدّل اسمك ورقم هاتفك، وبريدك الإلكتروني يبقى ثابتاً."
         path="/profile"
         noindex
       />
@@ -133,7 +136,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#e4f542] shrink-0" />
-                رقم واتسابك يظهر في طلباتك
+                رقم هاتفك يظهر في طلباتك
               </div>
               <div className="flex items-center gap-2.5">
                 <ShoppingCart className="w-4 h-4 text-[#e4f542] shrink-0" />
@@ -167,7 +170,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
               </span>
             </h1>
             <p className="mt-3 text-sm font-bold text-neutral-500">
-              يمكنك تعديل اسمك ورقم واتسابك — أما بريدك الإلكتروني فهو ثابت بجزء من هويتك.
+               يمكنك تعديل اسمك ورقم هاتفك — أما بريدك الإلكتروني فهو ثابت بجزء من هويتك.
             </p>
 
             {!user.isEmailVerified && (
@@ -238,7 +241,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
               </div>
 
               <div>
-                <Field label="واتساب (اختياري)" icon={<Phone className="w-3.5 h-3.5" />}>
+                <Field label="رقم الهاتف (اختياري)" icon={<Phone className="w-3.5 h-3.5" />}>
                   <input
                     type="tel"
                     value={phone}
@@ -290,9 +293,23 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
   );
 }
 
+function TabBtn({ active, onClick, label }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-black ${
+        active ? 'bg-black text-white' : 'bg-white text-black hover:bg-neutral-100'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function ProfilePage() {
   const { user, loading, updateProfile, logout, verifyEmail, resendVerification } = useAuth();
   const { count } = useCart();
+  const [tab, setTab] = useState('profile');
 
   if (loading) {
     return (
@@ -305,14 +322,54 @@ export default function ProfilePage() {
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
-    <ProfileInner
-      key={user.email}
-      user={user}
-      updateProfile={updateProfile}
-      logout={logout}
-      cartCount={count}
-      verifyEmail={verifyEmail}
-      resendVerification={resendVerification}
-    />
+    <div>
+      <div className="fixed top-0 left-0 right-0 z-[130] flex gap-2 overflow-x-auto bg-white/95 backdrop-blur border-b-2 border-black px-4 py-2">
+        <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} label="الملف الشخصي" />
+        <TabBtn active={tab === 'orders'} onClick={() => setTab('orders')} label="طلباتي" />
+        <TabBtn active={tab === 'support'} onClick={() => setTab('support')} label="الدعم الفني" />
+        <TabBtn active={tab === 'notifications'} onClick={() => setTab('notifications')} label="الإشعارات" />
+      </div>
+
+      {tab === 'profile' && (
+        <ProfileInner
+          key={user.email}
+          user={user}
+          updateProfile={updateProfile}
+          logout={logout}
+          cartCount={count}
+          verifyEmail={verifyEmail}
+          resendVerification={resendVerification}
+        />
+      )}
+
+      {tab === 'orders' && (
+        <PanelPage title="طلباتي">
+          <OrdersPanel user={user} />
+        </PanelPage>
+      )}
+      {tab === 'support' && (
+        <PanelPage title="الدعم الفني">
+          <SupportPanel user={user} />
+        </PanelPage>
+      )}
+      {tab === 'notifications' && (
+        <PanelPage title="الإشعارات">
+          <NotificationsPanel />
+        </PanelPage>
+      )}
+    </div>
+  );
+}
+
+function PanelPage({ title, children }) {
+  return (
+    <main dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
+      <Navbar />
+      <div className="relative max-w-3xl mx-auto px-6 pt-32 md:pt-40 pb-20">
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter">{title}</h1>
+        <div className="mt-8">{children}</div>
+      </div>
+      <Footer />
+    </main>
   );
 }

@@ -9,6 +9,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Suspense>

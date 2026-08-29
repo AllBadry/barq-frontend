@@ -7,7 +7,7 @@ import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check } from 'lucide-react';
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
-import { PLATFORMS, cartItem } from '../data/products';
+import { PLATFORMS, cartItem, linkGuide } from '../data/products';
 import { useCart } from '../context/useCart';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,27 +15,89 @@ gsap.registerPlugin(ScrollTrigger);
 function AddToCartButton({ p, g, item }) {
   const { add } = useCart();
   const [done, setDone] = useState(false);
+  const [show, setShow] = useState(false);
+  const [link, setLink] = useState('');
+  const [err, setErr] = useState('');
+  const guide = linkGuide(g);
 
-  const handle = (e) => {
-    e.preventDefault();
-    add(cartItem(p, g, item));
+  const confirm = () => {
+    const v = link.trim();
+    if (!v) {
+      setErr(`الرجاء إدخال ${guide.label}`);
+      return;
+    }
+    add(cartItem(p, g, item, v));
+    setShow(false);
+    setLink('');
+    setErr('');
     setDone(true);
     setTimeout(() => setDone(false), 1400);
   };
 
   return (
-    <button
-      onClick={handle}
-      aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
-      className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] transition-all duration-200 ${
-        done
-          ? 'bg-[#e4f542] hover:bg-[#d6e72c]'
-          : 'bg-white hover:bg-[#407BFF] hover:text-white'
-      }`}
-    >
-      {done ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
-      {done ? 'أُضيف' : 'أضِف للسلة'}
-    </button>
+    <>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setShow(true);
+        }}
+        aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
+        className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] transition-all duration-200 ${
+          done
+            ? 'bg-[#e4f542] hover:bg-[#d6e72c]'
+            : 'bg-white hover:bg-[#407BFF] hover:text-white'
+        }`}
+      >
+        {done ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+        {done ? 'أُضيف' : 'أضِف للسلة'}
+      </button>
+
+      {show && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setShow(false)}
+        >
+          <div
+            className="w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
+            <p className="mt-1 text-sm font-bold text-neutral-500">
+              {item.qty} {g.cat} — {p.name}
+              {g.sub ? ` (${g.sub})` : ''}
+            </p>
+            <label className="mt-4 block text-[11px] font-black uppercase tracking-widest text-neutral-500">{guide.label}</label>
+            <input
+              value={link}
+              onChange={(e) => {
+                setLink(e.target.value);
+                setErr('');
+              }}
+              dir="ltr"
+              autoFocus
+              placeholder={guide.placeholder}
+              className="mt-1 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#000]"
+            />
+            <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">{guide.hint}</p>
+            {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={confirm}
+                className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-[#407BFF] transition-colors"
+              >
+                إضافة للسلة
+              </button>
+              <button
+                onClick={() => setShow(false)}
+                className="px-5 bg-white text-black text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-neutral-100 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

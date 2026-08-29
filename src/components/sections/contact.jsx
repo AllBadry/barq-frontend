@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Send, MessageCircle, Mail, ArrowUpRight, Check } from 'lucide-react';
-import { FaWhatsapp, FaTelegramPlane, FaInstagram } from 'react-icons/fa';
+import { FaTelegramPlane, FaInstagram } from 'react-icons/fa';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,19 +11,19 @@ const HEAD_WORDS = ['خطك', 'المباشر', 'مع', 'برق'];
 
 const CHANNELS = [
   {
-    icon: FaWhatsapp,
-    label: 'واتساب',
-    value: '0785151865',
-    note: 'أسرع وسيلة للرد الفوري',
-    href: 'https://wa.me/962785151865',
-    bg: '#25D366',
+    icon: MessageCircle,
+    label: 'الدعم الفني',
+    value: 'نظام التذاكر',
+    note: 'الطريقة الرسمية للتواصل — مربوطة بالبوت',
+    href: '#contact-form',
+    bg: '#111111',
   },
   {
     icon: FaTelegramPlane,
     label: 'تيلغرام',
     value: '@barqstore',
-    note: 'دعم مباشر وقنوات التحديثات',
-    href: '#',
+    note: 'دعم مباشر عبر بوت التليغرام',
+    href: '#contact-form',
     bg: '#229ED9',
   },
   {
@@ -200,8 +200,8 @@ export default function Contact() {
                 <input
                   required
                   type="text"
-                  pattern="[0-9+() -]*"
-                  placeholder="رقم الواتساب"
+                  pattern="[0-9+\(\)\- ]*"
+                  placeholder="رقم الهاتف"
                   className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
                 />
               </div>

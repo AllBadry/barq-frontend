@@ -1,7 +1,5 @@
 import { FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 
-export const WA = 'https://wa.me/962785151865';
-
 export const PLATFORMS = [
   {
     id: 'instagram',
@@ -205,16 +203,42 @@ export const SUGGESTIONS = [
 
 export const POPULAR = PRODUCT_INDEX.filter(({ g, item }) => g.items[0] === item).slice(0, 6);
 
-export const orderLink = (p, g, item) =>
-  `${WA}?text=${encodeURIComponent(
-    `مرحباً برق، أريد طلب:\n${item.qty} ${g.cat} — ${p.name}${g.sub ? ` (${g.sub})` : ''}\nالسعر: ${item.price} JOD`
-  )}`;
+// يحدد نوع الرابط المطلوب حسب تصنيف الخدمة (متابعات/ريلز/منشور)
+export function linkGuide(g) {
+  const cat = (g && g.cat) || '';
+  if (cat.includes('متابع')) {
+    return {
+      label: 'رابط الحساب',
+      placeholder: 'https://instagram.com/username',
+      hint: 'الرابط الذي سيُضاف إليه المتابعون (حسابك على المنصة).',
+    };
+  }
+  if (cat.includes('ريلز')) {
+    return {
+      label: 'رابط الريلز',
+      placeholder: 'https://instagram.com/reel/XXXX',
+      hint: 'رابط الريلز التي تريد المشاهدات أو التفاعل عليها.',
+    };
+  }
+  if (cat.includes('بوست') || cat.includes('لايك')) {
+    return {
+      label: 'رابط المنشور',
+      placeholder: 'https://instagram.com/p/XXXX',
+      hint: 'رابط المنشور الذي تريد الإعجابات أو التفاعل عليه.',
+    };
+  }
+  return {
+    label: 'الرابط المستهدف',
+    placeholder: 'https://instagram.com/...',
+    hint: 'الرابط الذي تريد توجيه الخدمة إليه.',
+  };
+}
 
-export const cartItem = (p, g, item) => {
+export const cartItem = (p, g, item, link = '') => {
   const gi = p.groups.indexOf(g);
   const ii = g.items.indexOf(item);
   return {
-    key: `${p.id}__${gi}__${ii}`,
+    key: `${p.id}__${gi}__${ii}__${link}`,
     platformId: p.id,
     platformName: p.name,
     en: p.en,
@@ -223,5 +247,6 @@ export const cartItem = (p, g, item) => {
     badge: g.badge ?? null,
     qty: item.qty,
     price: item.price,
+    link: link || '',
   };
 };

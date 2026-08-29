@@ -3,7 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Zap, Mail, Lock, User, Phone, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
-import { FaWhatsapp, FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaInstagram, FaTiktok } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -226,7 +226,7 @@ export default function AuthPage() {
 
               {/* مميزات سريعة */}
               <ul className="mt-8 md:mt-10 space-y-2.5 text-xs font-bold text-white/70 max-w-sm">
-                {['فلترة فورية لكل طلباتك', 'تأكيد تسليم لحظي عبر واتساب', '100% حفظ للبيانات تشفيراً'].map((t) => (
+                {['فلترة فورية لكل طلباتك', 'تأكيد تسليم لحظي عبر الإشعارات', '100% حفظ للبيانات تشفيراً'].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
                     <ShieldCheck className="w-4 h-4 text-[#e4f542] shrink-0" />
                     {t}
@@ -237,7 +237,7 @@ export default function AuthPage() {
               {/* أيقونات عائمة + موسيقى */}
               <div className="mt-auto pt-8 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  {[FaInstagram, FaTiktok, FaWhatsapp].map((Ic, i) => (
+                  {[FaInstagram, FaTiktok].map((Ic, i) => (
                     <span key={i} className="drifty w-10 h-10 border border-white/15 bg-white/5 flex items-center justify-center rounded-full" style={{ ['--dd']: `${4 + i}s`, ['--dr']: `${i * 4}deg` }}>
                       <Ic className="w-4 h-4" />
                     </span>
@@ -397,7 +397,7 @@ export default function AuthPage() {
 
                 {!isLogin && (
                   <div>
-                    <FieldLabel icon={<Phone className="w-3.5 h-3.5" />}>واتساب (اختياري)</FieldLabel>
+                    <FieldLabel icon={<Phone className="w-3.5 h-3.5" />}>رقم الهاتف (اختياري)</FieldLabel>
                     <div className="relative mt-1">
                       <input
                         type="tel"
