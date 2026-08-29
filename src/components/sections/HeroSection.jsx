@@ -48,24 +48,45 @@ export default function HeroSection() {
       .to('.hero-marquee', { y: -120, ease: 'none', force3D: true }, 0)
       .to('.main-character', { y: 90, ease: 'none', force3D: true }, 0);
 
-    // تحسين أداء الأشرطة لمنع أي لاغ — حركة transform على الـ GPU فقط
+    // تحسين أداء الأشرطة — نحرّك transform على الـ GPU فقط،
+    // ونتوقف مؤقتاً (pause) عندما يغادر الشريط مجال الرؤية لتفادي
+    // تعلّق السكرول السريع على الهاتف/الايباد (الأنيميشن المستمر باهظ).
     const setupMarquee = (ref, direction, duration) => {
       const track = ref.current;
       if (!track) return;
-      
-      const singleWidth = track.scrollWidth / 2;
-      gsap.set(track, { x: 0, force3D: true });
 
-      gsap.to(track, {
-        x: direction === -1 ? `-=${singleWidth}` : `+=${singleWidth}`,
-        duration: duration,
-        ease: 'none',
-        force3D: true,
-        repeat: -1,
-        modifiers: {
-          x: gsap.utils.unitize((x) => parseFloat(x) % singleWidth)
+      const singleWidth = track.scrollWidth / 2;
+      const tween = gsap.fromTo(
+        track,
+        { x: 0 },
+        {
+          x: direction === -1 ? `-=${singleWidth}` : `+=${singleWidth}`,
+          duration,
+          ease: 'none',
+          force3D: true,
+          repeat: -1,
+          paused: true, // نبدأ متوقفاً ونشغّله فور دخوله مجال الرؤية
+          modifiers: {
+            x: gsap.utils.unitize((x) => parseFloat(x) % singleWidth),
+          },
         }
-      });
+      );
+
+      // نتحكم في التشغيل/الإيقاف حسب وضوح عنصر الشريط
+      if (typeof IntersectionObserver !== 'undefined') {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) tween.play();
+              else tween.pause();
+            });
+          },
+          { rootMargin: '100px 0px' } // حيّز إضافي حتى يبدأ قبل الوصول مباشرة
+        );
+        io.observe(track);
+      } else {
+        tween.play();
+      }
     };
 
     setupMarquee(marquee1, -1, 20);
