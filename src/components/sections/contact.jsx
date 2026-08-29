@@ -5,7 +5,7 @@ import { useGSAP } from '@gsap/react';
 import { Send, MessageCircle, Mail, ArrowUpRight, Check } from 'lucide-react';
 import { FaTelegramPlane ,} from 'react-icons/fa';
 import { usePopup } from '../../context/usePopup';
-import api from '../../lib/api';
+import { api } from '../../lib/api';
 import { Loader2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);

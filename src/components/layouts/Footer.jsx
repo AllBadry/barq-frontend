@@ -24,7 +24,7 @@ const PLATFORMS = [
 
 const CONTACTS = [
   { icon: FaPhone, label: 'رقم الهاتف', value: '0785151865', href: 'tel:962785151865' },
-  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@BaarqStore', href: '/contact#contact-form' },
+  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@BaarqStore', href: 't.me/BaarqStore' },
   { icon: Mail, label: 'البريد الإلكتروني', value: 'support@barqstore.org', href: 'mailto:support@barqstore.org' },
   { icon: Clock, label: 'الدعم الفني', value: 'متاح 24/7 على مدار الأسبوع', href: '/contact' },
 ];
