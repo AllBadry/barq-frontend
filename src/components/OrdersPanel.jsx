@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 
 const statusLabel = (o) => {
@@ -12,27 +12,59 @@ export default function OrdersPanel() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
-  const [msg, setMsg] = useState('');
-  const fileRefs = useRef({});
+  const [messages, setMessages] = useState({}); // لحفظ الرسائل لكل طلب على حدة
+  const [selectedFiles, setSelectedFiles] = useState({}); // لحفظ الملفات المحددة لكل طلب
 
   const load = () => {
-    api.request('/api/orders/my-orders').then((r) => setOrders(r.data.orders)).catch(() => {}).finally(() => setLoading(false));
+    api.request('/api/orders/my-orders')
+      .then((r) => setOrders(r.data.orders))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   };
-  useEffect(load, []);
+  
+  useEffect(() => {
+    load();
+  }, []);
 
-  const upload = async (id) => {
-    const file = fileRefs.current[id]?.files?.[0];
-    if (!file) return setMsg('اختر صورة الإيصال أولاً');
-    const fd = new FormData();
-    fd.append('receipt', file);
-    setBusyId(id);
-    setMsg('');
+  const handleFileChange = (e, orderId) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFiles(prev => ({ ...prev, [orderId]: file }));
+      setMessages(prev => ({ ...prev, [orderId]: { text: `تم تحديد: ${file.name}`, type: 'info' } }));
+    }
+  };
+
+  const uploadReceipt = async (orderId) => {
+    const file = selectedFiles[orderId];
+    if (!file) {
+      setMessages(prev => ({ ...prev, [orderId]: { text: 'الرجاء اختيار صورة الإيصال أولاً', type: 'error' } }));
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('receipt', file);
+    setBusyId(orderId);
+    
+    // إزالة الرسالة السابقة أثناء الرفع
+    setMessages(prev => ({ ...prev, [orderId]: { text: 'جارٍ الرفع...', type: 'info' } }));
+
     try {
-      await api.request(`/api/orders/${id}/receipt`, { method: 'POST', body: fd });
-      setMsg('تم رفع الإيصال ✅ بانتظار تأكيد الأدمن');
-      load();
+      // إرسال الصورة للباك إند
+      const res = await api.request(`/api/orders/${orderId}/receipt`, { 
+        method: 'POST', 
+        body: formData 
+      });
+      
+      setMessages(prev => ({ ...prev, [orderId]: { text: 'تم رفع الإيصال ✅ بانتظار التأكيد', type: 'success' } }));
+      // مسح الملف من الواجهة بعد النجاح
+      setSelectedFiles(prev => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+      load(); // تحديث قائمة الطلبات
     } catch (e) {
-      setMsg(e.message || 'فشل الرفع');
+      setMessages(prev => ({ ...prev, [orderId]: { text: e.message || 'فشل الرفع', type: 'error' } }));
     } finally {
       setBusyId(null);
     }
@@ -43,9 +75,10 @@ export default function OrdersPanel() {
 
   return (
     <div className="space-y-4">
-      {msg && <p className="text-xs font-black text-[#1d4ed8]">{msg}</p>}
       {orders.map((o) => {
         const s = statusLabel(o);
+        const msg = messages[o._id];
+
         return (
           <div key={o._id} className="border-2 border-black shadow-[4px_4px_0px_#000] bg-white p-4">
             <div className="flex items-center justify-between">
@@ -63,13 +96,29 @@ export default function OrdersPanel() {
             <p className="mt-2 text-xs text-neutral-500" dir="ltr">الرابط: {o.targetLink}</p>
             <p className="text-sm font-black mt-1" dir="ltr">الإجمالي: {o.totalPrice} JOD</p>
 
-            {o.paymentStatus !== 'paid' && o.paymentStatus !== 'rejected' && (
+            {/* عرض رسالة الخطأ أو النجاح الخاصة بهذا الطلب فقط */}
+            {msg && (
+              <p className={`mt-2 text-xs font-black ${
+                msg.type === 'error' ? 'text-red-600' : 
+                msg.type === 'success' ? 'text-green-600' : 'text-blue-600'
+              }`}>
+                {msg.text}
+              </p>
+            )}
+
+            {/* عرض أزرار الرفع فقط إذا لم يكن مدفوعاً أو مرفوضاً */}
+            {o.paymentStatus !== 'paid' && o.paymentStatus !== 'rejected' && o.paymentStatus !== 'pending_review' && (
               <div className="mt-3 flex items-center gap-2">
-                <input ref={(el) => { fileRefs.current[o._id] = el; }} type="file" accept="image/*" className="text-xs" />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => handleFileChange(e, o._id)}
+                  className="text-xs" 
+                />
                 <button
-                  onClick={() => upload(o._id)}
-                  disabled={busyId === o._id}
-                  className="bg-black text-white text-xs font-black px-3 py-2 border-2 border-black hover:bg-[#407BFF] disabled:opacity-60"
+                  onClick={() => uploadReceipt(o._id)}
+                  disabled={busyId === o._id || !selectedFiles[o._id]}
+                  className="bg-black text-white text-xs font-black px-3 py-2 border-2 border-black hover:bg-[#407BFF] disabled:opacity-50"
                 >
                   {busyId === o._id ? 'جارٍ الرفع…' : 'رفع الإيصال'}
                 </button>
