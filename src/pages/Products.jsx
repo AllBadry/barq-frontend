@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, createPortal } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check } from 'lucide-react';
+import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X } from 'lucide-react'; // أضفنا X هنا
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -12,6 +12,9 @@ import { useCart } from '../context/useCart';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ==========================================
+// 1. مكون زر الإضافة والبوب-أب (المعدل والمصلح)
+// ==========================================
 function AddToCartButton({ p, g, item }) {
   const { add } = useCart();
   const [done, setDone] = useState(false);
@@ -39,6 +42,7 @@ function AddToCartButton({ p, g, item }) {
       <button
         onClick={(e) => {
           e.preventDefault();
+          e.stopPropagation(); // 🔥 مهم جداً: يمنع تداخل الضغطة مع خاصية السحب
           setShow(true);
         }}
         aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
@@ -52,22 +56,38 @@ function AddToCartButton({ p, g, item }) {
         {done ? 'أُضيف' : 'أضِف للسلة'}
       </button>
 
+      {/* البوب-أب الخاص بالرابط */}
       {show &&
         createPortal(
           <div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4"
-            onClick={() => setShow(false)}
+            dir="rtl" // 🔥 مهم جداً: لأن الـ Portal يخرج خارج الـ Main
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShow(false);
+            }}
           >
             <div
-              className="w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6"
+              className="relative w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-8 animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
-              <p className="mt-1 text-sm font-bold text-neutral-500">
+              {/* زر الإغلاق X */}
+              <button
+                onClick={() => setShow(false)}
+                className="absolute top-4 right-4 text-neutral-400 hover:text-black transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-2xl font-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
+              <p className="mt-2 text-sm font-bold text-neutral-500 bg-neutral-100 p-2 rounded border border-neutral-200">
                 {item.qty} {g.cat} — {p.name}
                 {g.sub ? ` (${g.sub})` : ''}
               </p>
-              <label className="mt-4 block text-[11px] font-black uppercase tracking-widest text-neutral-500">{guide.label}</label>
+              
+              <label className="mt-5 block text-[11px] font-black uppercase tracking-widest text-neutral-500">
+                {guide.label}
+              </label>
               <input
                 value={link}
                 onChange={(e) => {
@@ -77,20 +97,24 @@ function AddToCartButton({ p, g, item }) {
                 dir="ltr"
                 autoFocus
                 placeholder={guide.placeholder}
-                className="mt-1 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#000]"
+                className="mt-1.5 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-shadow"
               />
-              <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">{guide.hint}</p>
+              <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">
+                {guide.hint}
+              </p>
+              
               {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
-              <div className="mt-5 flex gap-3">
+              
+              <div className="mt-6 flex gap-3">
                 <button
                   onClick={confirm}
-                  className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-[#407BFF] transition-colors"
+                  className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3.5 border-2 border-black hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]"
                 >
-                  إضافة للسلة
+                  تأكيد وإضافة للسلة
                 </button>
                 <button
                   onClick={() => setShow(false)}
-                  className="px-5 bg-white text-black text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-neutral-100 transition-colors"
+                  className="px-6 bg-white text-black text-sm font-black uppercase tracking-widest py-3.5 border-2 border-black hover:bg-neutral-100 transition-colors"
                 >
                   إلغاء
                 </button>
@@ -102,6 +126,10 @@ function AddToCartButton({ p, g, item }) {
     </>
   );
 }
+
+// ==========================================
+// 2. باقي الأكواد كما هي بدون تغيير
+// ==========================================
 
 function useDragScroll() {
   const ref = useRef(null);
@@ -218,7 +246,6 @@ export default function Products() {
     );
     gsap.from('.pto-hero-meta', { y: 30, opacity: 0, stagger: 0.1, delay: 0.4, duration: 0.8, ease: 'power3.out' });
 
-    // كلمة المنصة العملاقة: دخول جانبي + parallax (parallax للديسكتوب فقط)
     const desktop = window.matchMedia('(min-width: 1024px)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -243,8 +270,6 @@ export default function Products() {
       );
     });
 
-    // ===== إخفاء أولي فوري قبل أول رسم (منع وميض: لا تظهر ثم تختفي ثم تعود) =====
-    // على الجوال: دخول أخف (إزاحة صغيرة + شفافية) بلا clipPath لرفع الأداء
     const mobile = window.matchMedia('(max-width: 767px)').matches;
 
     if (mobile) {
@@ -261,7 +286,6 @@ export default function Products() {
     gsap.set('.pto-sec-bar-dot', { scale: 0, rotate: 90 });
     gsap.set('.pto-badge', { scale: 0 });
 
-    // الكروت: تظهر عند الوصول لها بالسكرول فقط — مرة واحدة (لا تختفي ثانية أبداً)
     ScrollTrigger.batch('.pto-card', {
       start: 'top 94%',
       once: true,
@@ -289,7 +313,6 @@ export default function Products() {
             }),
     });
 
-    // رؤوس الأقسام (الشعار + الاسم + الدائرة): دخول جانبي متدرج — عند الوصول لها
     ScrollTrigger.batch('.pto-sec-head', {
       start: 'top 80%',
       once: true,
@@ -306,7 +329,6 @@ export default function Products() {
         }),
     });
 
-    // أشرطة القسم: مقياس من نص الكلمة + نزول العنوان
     gsap.utils.toArray('.pto-sec-bar').forEach((bar) => {
       gsap
         .timeline({
@@ -329,7 +351,6 @@ export default function Products() {
       if (badge) gsap.fromTo(badge, { scale: 0 }, { scale: 1, duration: 0.35, ease: 'back.out(2)', delay: 0.45 });
     });
 
-    // مؤشر المنصة النشطة
     PLATFORMS.forEach((p, i) => {
       ScrollTrigger.create({
         trigger: `#platform-${p.id}`,
@@ -340,7 +361,6 @@ export default function Products() {
       });
     });
 
-    // شريط تقدّم القراءة أعلى الصفحة
     gsap.fromTo(
       '.pto-progress',
       { scaleX: 0 },
@@ -370,12 +390,10 @@ export default function Products() {
         path="/products"
       />
 
-      {/* شريط تقدم القراءة */}
       <div className="fixed top-0 left-0 right-0 h-1.5 z-[120] bg-black/10" dir="ltr">
         <div className="pto-progress h-full origin-left bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]" style={{ transform: 'scaleX(0)' }}></div>
       </div>
 
-      {/* مؤشر المنصات الثابت */}
       <aside className="fixed left-4 top-1/2 -translate-y-1/2 z-[110] hidden xl:flex flex-col items-center gap-3" dir="ltr">
         {PLATFORMS.map((p, i) => {
           const Icon = p.Icon;
@@ -397,7 +415,6 @@ export default function Products() {
         <Zap className="w-4 h-4 text-[#e4f542]" />
       </aside>
 
-      {/* ============ HERO ============ */}
       <section className="relative bg-white overflow-hidden pt-28 md:pt-36 pb-10">
         <div className="absolute inset-0 dot-grid opacity-40" aria-hidden="true"></div>
         <div className="absolute inset-0 grid place-items-center pointer-events-none" aria-hidden="true">
@@ -429,7 +446,6 @@ export default function Products() {
         </div>
       </section>
 
-      {/* شريط المنصات السريع */}
       <div className="relative border-y-4 border-black bg-[#111] py-5 overflow-hidden">
         <div dir="ltr" className="t-marquee flex w-max select-none">
           {[...Array(2)].map((_, k) => (
@@ -452,12 +468,10 @@ export default function Products() {
         </div>
       </div>
 
-      {/* ============ أقسام المنصات ============ */}
       {PLATFORMS.map((p) => {
         const Icon = p.Icon;
         return (
           <section key={p.id} id={`platform-${p.id}`} className="relative overflow-hidden border-t-4 border-black" style={{ background: p.bg }}>
-            {/* الكلمة العملاقة في الخلف */}
             <span
               className="pto-word absolute -top-6 left-0 whitespace-nowrap leading-none font-black tracking-tighter select-none pointer-events-none"
               style={{ color: `${p.color}22`, fontSize: 'min(26vw, 340px)' }}
@@ -468,7 +482,6 @@ export default function Products() {
             </span>
 
             <div className="relative max-w-7xl mx-auto px-6 md:px-8 pt-24 pb-20">
-              {/* رأس المنصة */}
               <div className="pto-sec-head flex items-end justify-between gap-6 flex-wrap">
                 <div>
                   <span className="inline-flex items-center gap-3 px-4 py-2 rounded-full text-xs font-black uppercase tracking-[0.3em] border-2 border-black shadow-[3px_3px_0px_#000]" style={{ background: p.color, color: p.dark }}>
@@ -484,7 +497,6 @@ export default function Products() {
                 </div>
               </div>
 
-              {/* الأقسام الفرعية */}
               <div className="mt-14 space-y-14">
                 {p.groups.map((g, gi) => (
                   <TierRow key={gi} p={p} g={g} gi={gi} />

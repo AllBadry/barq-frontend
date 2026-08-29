@@ -109,12 +109,13 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
         noindex
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 pt-32 md:pt-40 pb-20">
+      {/* التعديل هنا: زيادة الـ Padding العلوي (pt-40 md:pt-48) لكي لا يختبئ المحتوى أسفل التابات */}
+      <div className="relative max-w-7xl mx-auto px-6 pt-40 md:pt-48 pb-20">
         <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true"></div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-6 md:gap-8 items-start">
           {/* بطاقة الهوية */}
-          <aside className="profile-bot bg-[#101314] text-white border-2 border-black shadow-[12px_12px_0px_#000] p-7 md:p-9 lg:sticky lg:top-28">
+          <aside className="profile-bot bg-[#101314] text-white border-2 border-black shadow-[12px_12px_0px_#000] p-7 md:p-9 lg:sticky lg:top-36">
             <p className="text-[10px] font-mono font-black tracking-[0.35em] uppercase text-white/50">
               PROFILE / BARQ ID
             </p>
@@ -297,7 +298,7 @@ function TabBtn({ active, onClick, label }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-black ${
+      className={`px-4 py-2 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-black whitespace-nowrap shrink-0 transition-colors ${
         active ? 'bg-black text-white' : 'bg-white text-black hover:bg-neutral-100'
       }`}
     >
@@ -323,7 +324,9 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <div className="fixed top-0 left-0 right-0 z-[130] flex gap-2 overflow-x-auto bg-white/95 backdrop-blur border-b-2 border-black px-4 py-2">
+      {/* التعديل الأهم هنا: إزاحة التابات للأسفل لتبتعد عن الناف بار (top-[72px] md:top-[88px]) 
+          مع z-[40] لتنزلق تحت الناف بار عند التمرير، وإخفاء شريط التمرير لأناقة أكثر */}
+      <div className="fixed top-[72px] md:top-[88px] left-0 right-0 z-[40] flex gap-2 overflow-x-auto bg-white/95 backdrop-blur-md border-b-2 border-black px-6 py-3 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} label="الملف الشخصي" />
         <TabBtn active={tab === 'orders'} onClick={() => setTab('orders')} label="طلباتي" />
         <TabBtn active={tab === 'support'} onClick={() => setTab('support')} label="الدعم الفني" />
@@ -365,7 +368,8 @@ function PanelPage({ title, children }) {
   return (
     <main dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
-      <div className="relative max-w-3xl mx-auto px-6 pt-32 md:pt-40 pb-20">
+      {/* التعديل هنا أيضاً: زيادة الـ Padding العلوي (pt-40 md:pt-48) */}
+      <div className="relative max-w-3xl mx-auto px-6 pt-40 md:pt-48 pb-20">
         <h1 className="text-4xl md:text-5xl font-black tracking-tighter">{title}</h1>
         <div className="mt-8">{children}</div>
       </div>
