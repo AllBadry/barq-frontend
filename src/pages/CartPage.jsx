@@ -1,8 +1,8 @@
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { ShoppingCart, Plus, Minus, Trash2, Zap, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Zap, ArrowLeft, ShieldCheck, Loader2 } from 'lucide-react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -10,6 +10,7 @@ import Seo from '../components/Seo';
 import { useCart } from '../context/useCart';
 import { useAuth } from '../context/useAuth';
 import { PLATFORMS } from '../data/products';
+import { api } from '../lib/api'; // استيراد دالة الـ API
 
 function CartEntry({ item, index }) {
   const { setCount, remove } = useCart();
@@ -80,6 +81,49 @@ export default function CartPage() {
   const pageRef = useRef(null);
   const { items, count, total, clear } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // دالة إتمام الشراء 🚀
+  const handleCheckout = async () => {
+    // 1. التأكد من تسجيل الدخول
+    if (!user) {
+      alert('الرجاء تسجيل الدخول أولاً لإتمام الطلب.');
+      return navigate('/auth?redirect=/cart');
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // تجهيز بيانات الطلب (نأخذ الرابط من أول منتج في السلة)
+      const orderData = {
+        items: items.map(it => ({
+          productId: it.productId, // يجب التأكد أن دالة الإضافة في المنتجات تضع productId
+          name: `${it.qty} ${it.cat} - ${it.platformName}`,
+          price: it.price,
+          quantity: it.count,
+          link: it.link
+        })),
+        targetLink: items[0]?.link || '' // الرابط الأساسي للطلب
+      };
+
+      // 2. إرسال الطلب للباك إند
+      await api.request('/api/orders', {
+        method: 'POST',
+        body: orderData
+      });
+
+      // 3. النجاح
+      alert('تم تسجيل طلبك بنجاح! 🎉 راجع بريدك الإلكتروني لتفاصيل الدفع أو ارفع الإيصال من صفحة طلباتك.');
+      clear(); // إفراغ السلة
+      navigate('/profile'); // التوجيه لصفحة الطلبات لرفع الإيصال
+
+    } catch (err) {
+      alert(err.message || 'حدث خطأ أثناء إنشاء الطلب.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });
@@ -181,13 +225,23 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <Link
-                  to="/checkout"
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#407BFF] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200"
+                <button
+                  onClick={handleCheckout}
+                  disabled={isSubmitting}
+                  className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#407BFF] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_#000] cursor-pointer"
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  إتمام الطلب عبر بنك الاتحاد
-                </Link>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      جاري التنفيذ...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      إتمام الطلب عبر بنك الاتحاد
+                    </>
+                  )}
+                </button>
 
                 <p className="mt-4 text-[11px] font-bold text-neutral-500 leading-relaxed">
                   {user ? (
