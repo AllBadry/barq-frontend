@@ -136,7 +136,7 @@ export default function AboutUs() {
         <section className="cinematic-section relative flex flex-col md:flex-row min-h-[80vh] border-b-4 border-white/10">
           <div className="w-full md:w-1/2 relative overflow-hidden border-r-4 border-white/10">
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/40 to-transparent z-10" />
-            <img src="/instamanwebp.webp" alt="Instagram Dominance" className="cine-img w-full h-full object-cover object-center" />
+            <img src="/instamanpng.webp" alt="Instagram Dominance" className="cine-img w-full h-full object-cover object-center" />
           </div>
           <div className="cine-content w-full md:w-1/2 flex flex-col justify-center p-10 md:p-20 bg-black z-20">
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-[#FF3BFF] uppercase mb-6" dir="ltr">Instagram</h2>
