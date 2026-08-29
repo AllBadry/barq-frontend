@@ -4,10 +4,17 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Send, MessageCircle, Mail, ArrowUpRight, Check } from 'lucide-react';
 import { FaTelegramPlane ,} from 'react-icons/fa';
+import { usePopup } from '../../context/usePopup';
+import api from '../../utils/api';
+import { Loader2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const HEAD_WORDS = ['خطك', 'المباشر', 'مع', 'برق'];
+const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [sent, setSent] = useState(false);
+const { showPopup } = usePopup();
 
 const CHANNELS = [
   {
@@ -48,45 +55,42 @@ export default function Contact() {
   const [sent, setSent] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await api.request('/api/support/message', {
+        method: 'POST',
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.subject ? `📌 الموضوع: ${formData.subject}\n\n💬 التفاصيل: ${formData.message}` : formData.message
+        }, 
+      });
 
-  // سحب البيانات من الحقول
-  const formData = new FormData(e.target);
-  const data = {
-    name: formData.get('name'),
-    email: formData.get('email'), // استخدمنا حقل الهاتف/الإيميل
-    subject: formData.get('subject') || 'استفسار من صفحة التواصل',
-    message: formData.get('message'),
+      setSent(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      
+      showPopup({
+        type: 'success',
+        title: 'تم إرسال رسالتك! 🚀',
+        text: 'تم تحويل استفسارك إلى فريقنا، وسنتواصل معك قريباً عبر البريد الإلكتروني أو الهاتف.',
+      });
+
+      setTimeout(() => setSent(false), 4000);
+    } catch (err) {
+      showPopup({
+        type: 'error',
+        title: 'عذراً!',
+        text: err.message || 'حدث خطأ أثناء الإرسال، الرجاء المحاولة مرة أخرى.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  try {
-    // إرسال الطلب إلى الباك إند الخاص بك
-    // تأكد من تغيير الرابط إذا كان الباك إند على رابط مختلف (مثل https://api.barqstore.org)
-    const response = await fetch('http://api.barqstore.org/api/tickets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      setSent(true);
-      e.target.reset(); // تفريغ الحقول بعد النجاح
-      setTimeout(() => setSent(false), 4000);
-    } else {
-      const errorData = await response.json();
-      alert('خطأ: ' + (errorData.message || 'لم يتم الإرسال'));
-    }
-  } catch (error) {
-    console.error('Fetch error:', error);
-    alert('حدث خطأ في الاتصال بالسيرفر.');
-  } finally {
-    setIsLoading(false);
-  }
-};
 
   useGSAP(() => {
     gsap.fromTo(
@@ -201,79 +205,111 @@ const [isLoading, setIsLoading] = useState(false);
             })}
           </div>
 
-          {/* نموذج الاستعلام */}
-          <div className="lg:col-span-7">
-            <form
-              onSubmit={handleSubmit}
-              className="cta-form relative bg-white border-2 border-black rounded-3xl p-8 sm:p-10 shadow-[10px_10px_0px_#000]"
-            >
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-11 h-11 bg-[#e4f542] border-2 border-black rounded-xl flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xl font-black">راسلنا مباشرة</h4>
-                  <p className="text-xs font-bold text-neutral-500">نرد عليك خلال دقائق في أوقات العمل</p>
-                </div>
-              </div>
+           {/* نموذج الاستعلام */}
+            <div className="lg:col-span-7">
+              <form
+                id="contact-form"
+                onSubmit={handleSubmit}
+                className="ct-form relative bg-white border-2 border-black rounded-3xl p-8 sm:p-10 shadow-[10px_10px_0px_#000] overflow-hidden"
+              >
+                <span className="absolute -top-12 -right-12 w-36 h-36 rounded-full opacity-10" style={{ background: '#407BFF' }}></span>
+                <span className="absolute -bottom-14 -left-10 w-40 h-40 rounded-full opacity-10" style={{ background: '#FF3BFF' }}></span>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  placeholder="اسمك الكريم"
-                  className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#407BFF] transition-all"
-                />
-                <input
-  type="text"
-  name="subject" // تمت الإضافة
-  placeholder="مثال: 5000 متابع إنستغرام مع ضمان"
-  className="..."
-/>
-                <input
-                  required
-                  type="email"
-                  name="email"
-                  placeholder="البريد الإلكتروني"
-                  className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
-                />
-              </div>
-              <textarea
-                required
-                name="message"
-                rows="4"
-                placeholder="اكتب استفسارك أو الخدمة التي تريدها..."
-                className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all mt-5 resize-none"
-              ></textarea>
+                <div className="relative flex items-center gap-3 mb-8">
+                  <div className="w-11 h-11 bg-[#e4f542] border-2 border-black rounded-xl flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black">راسلنا مباشرة</h4>
+                    <p className="text-xs font-bold text-neutral-500">للاستفسارات العامة، الدعم، أو الشراكات</p>
+                  </div>
+                </div>
 
-              <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                <button
-                  type="submit"
-                  className={`flex-1 flex items-center justify-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:bg-[#111] transition-all duration-200 cursor-pointer ${
-                    sent ? 'bg-[#25D366] text-black' : ''
-                  }`}
-                >
-                  {sent ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      تم استلام رسالتك بنجاح
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      أرسل الاستفسار
-                    </>
-                  )}
-                </button>
-                <span className="text-xs font-bold text-neutral-500 text-center sm:text-right">
-                  بياناتك آمنة ولن نشاركها مع أي طرف ثالث
-                </span>
-              </div>
-            </form>
+                <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">اسمك الكريم</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="مثال: أحمد"
+                      value={formData.name}
+                      onChange={e => setFormData({...formData, name: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#407BFF] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">البريد الإلكتروني</label>
+                    <input
+                      required
+                      type="email"
+                      placeholder="example@mail.com"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">رقم الهاتف (اختياري)</label>
+                    <input
+                      type="text"
+                      pattern="[0-9+\(\)\- ]*"
+                      placeholder="07XXXXXXXX"
+                      value={formData.phone}
+                      onChange={e => setFormData({...formData, phone: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">الموضوع</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="استفسار عام، شراكة، إلخ..."
+                      value={formData.subject}
+                      onChange={e => setFormData({...formData, subject: e.target.value})}
+                      className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <textarea
+                  required
+                  rows="4"
+                  placeholder="اكتب استفسارك هنا بكل وضوح وسنرد عليك في أقرب وقت..."
+                  value={formData.message}
+                  onChange={e => setFormData({...formData, message: e.target.value})}
+                  className="relative w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all mt-5 resize-none"
+                ></textarea>
+
+                <div className="relative mt-7 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`flex-1 flex items-center justify-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:bg-[#111] transition-all duration-200 cursor-pointer ${
+                      sent ? 'bg-[#25D366] text-black' : ''
+                    } disabled:opacity-70`}
+                  >
+                    {isSubmitting ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> جاري الإرسال...</>
+                    ) : sent ? (
+                      <><Check className="w-5 h-5" /> تم استلام رسالتك</>
+                    ) : (
+                      <><Send className="w-5 h-5" /> إرسال الاستفسار</>
+                    )}
+                  </button>
+                  <span className="text-xs font-bold text-neutral-500 text-center sm:text-right">
+                    بياناتك آمنة ولن نشاركها مع أي طرف ثالث
+                  </span>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 }
