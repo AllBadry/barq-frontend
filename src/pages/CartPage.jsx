@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { ShoppingCart, Plus, Minus, Trash2, Zap, ArrowLeft, ShieldCheck, Loader2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Zap, ArrowLeft, ShieldCheck, Loader2, CheckCircle, AlertTriangle, X } from 'lucide-react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -10,7 +11,7 @@ import Seo from '../components/Seo';
 import { useCart } from '../context/useCart';
 import { useAuth } from '../context/useAuth';
 import { PLATFORMS } from '../data/products';
-import { api } from '../lib/api'; // استيراد دالة الـ API
+import { api } from '../lib/api';
 
 function CartEntry({ item, index }) {
   const { setCount, remove } = useCart();
@@ -50,7 +51,6 @@ function CartEntry({ item, index }) {
           <button
             onClick={() => setCount(item.key, item.count + 1)}
             className="w-8 h-8 flex items-center justify-center hover:bg-[#e4f542] transition-colors"
-            aria-label="زيادة الكمية"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -60,7 +60,6 @@ function CartEntry({ item, index }) {
           <button
             onClick={() => setCount(item.key, item.count - 1)}
             className="w-8 h-8 flex items-center justify-center hover:bg-neutral-100 transition-colors"
-            aria-label="تقليل الكمية"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -68,7 +67,6 @@ function CartEntry({ item, index }) {
         <button
           onClick={() => remove(item.key)}
           className="w-9 h-9 flex items-center justify-center border-2 border-black text-black hover:bg-red-500 hover:text-white transition-colors"
-          aria-label="حذف المنتج"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -83,43 +81,51 @@ export default function CartPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [popup, setPopup] = useState(null); // لحفظ حالة البوب-أب (success, error, login)
 
-  // دالة إتمام الشراء 🚀
+  // دالة إتمام الشراء
   const handleCheckout = async () => {
-    // 1. التأكد من تسجيل الدخول
     if (!user) {
-      alert('الرجاء تسجيل الدخول أولاً لإتمام الطلب.');
-      return navigate('/auth?redirect=/cart');
+      setPopup({ 
+        type: 'login', 
+        title: 'عذراً يا برق!', 
+        text: 'الرجاء تسجيل الدخول أولاً لإتمام طلبك وربطه بحسابك.' 
+      });
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // تجهيز بيانات الطلب (نأخذ الرابط من أول منتج في السلة)
       const orderData = {
         items: items.map(it => ({
-          productId: it.productId, // يجب التأكد أن دالة الإضافة في المنتجات تضع productId
+          productId: it.productId,
           name: `${it.qty} ${it.cat} - ${it.platformName}`,
           price: it.price,
           quantity: it.count,
           link: it.link
         })),
-        targetLink: items[0]?.link || '' // الرابط الأساسي للطلب
+        targetLink: items[0]?.link || ''
       };
 
-      // 2. إرسال الطلب للباك إند
       await api.request('/api/orders', {
         method: 'POST',
         body: orderData
       });
 
-      // 3. النجاح
-      alert('تم تسجيل طلبك بنجاح! 🎉 راجع بريدك الإلكتروني لتفاصيل الدفع أو ارفع الإيصال من صفحة طلباتك.');
       clear(); // إفراغ السلة
-      navigate('/profile'); // التوجيه لصفحة الطلبات لرفع الإيصال
+      setPopup({ 
+        type: 'success', 
+        title: 'تم استلام طلبك! 🎉', 
+        text: 'راجع بريدك الإلكتروني لتفاصيل التحويل البنكي. يمكنك الآن الانتقال لصفحة طلباتك لرفع إيصال الدفع.' 
+      });
 
     } catch (err) {
-      alert(err.message || 'حدث خطأ أثناء إنشاء الطلب.');
+      setPopup({ 
+        type: 'error', 
+        title: 'حدث خطأ!', 
+        text: err.message || 'واجهنا مشكلة أثناء معالجة الطلب، حاول مرة أخرى.' 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -127,27 +133,14 @@ export default function CartPage() {
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });
-    gsap.fromTo(
-      '.cart-bot',
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out' }
-    );
-    gsap.fromTo(
-      '.cart-item',
-      { x: () => (window.matchMedia('(min-width: 768px)').matches ? 34 : 0), opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' }
-    );
+    gsap.fromTo('.cart-bot', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out' });
+    gsap.fromTo('.cart-item', { x: () => (window.matchMedia('(min-width: 768px)').matches ? 34 : 0), opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' });
   }, { scope: pageRef, dependencies: [items.length] });
 
   return (
     <main ref={pageRef} dir="rtl" className="relative w-full min-h-screen bg-white text-black overflow-x-hidden selection:bg-[#e4f542]">
       <Navbar />
-      <Seo
-        title="سلة المشتريات | متجر برق"
-        description="سلة مشترياتك في متجر برق — مراجعة طلباتك وإتمامها عبر الدفع البنكي بضغطة واحدة."
-        path="/cart"
-        noindex
-      />
+      <Seo title="سلة المشتريات | متجر برق" description="سلة مشترياتك في متجر برق." path="/cart" noindex />
 
       <div className="relative max-w-7xl mx-auto px-6 pt-32 md:pt-40 pb-20">
         <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true"></div>
@@ -173,15 +166,9 @@ export default function CartPage() {
                 <ShoppingCart className="w-12 h-12" />
               </span>
               <h2 className="mt-6 text-2xl md:text-3xl font-black">سلتك فارغة يا برق ⚡</h2>
-              <p className="mt-3 text-sm font-bold text-neutral-500">
-                تصفّح المنتجات وأضِف ما يناسبك — متابعون، مشاهدات، لايكات لكل المنصات.
-              </p>
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 mt-8 bg-black text-white text-sm font-black uppercase tracking-widest px-8 py-4 border-2 border-black hover:bg-[#407BFF] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200"
-              >
-                تصفّح المنتجات
-                <ArrowLeft className="w-4 h-4" />
+              <p className="mt-3 text-sm font-bold text-neutral-500">تصفّح المنتجات وأضِف ما يناسبك.</p>
+              <Link to="/products" className="inline-flex items-center gap-2 mt-8 bg-black text-white text-sm font-black uppercase tracking-widest px-8 py-4 border-2 border-black hover:bg-[#407BFF] transition-all">
+                تصفّح المنتجات <ArrowLeft className="w-4 h-4" />
               </Link>
             </div>
           ) : (
@@ -189,90 +176,71 @@ export default function CartPage() {
               {/* المنتجات */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-[11px] font-mono font-black tracking-widest uppercase text-neutral-400 px-1">
-                  <span>Add to cart → أدخل الرابط → check_out</span>
-                  <button
-                    onClick={clear}
-                    className="flex items-center gap-1.5 text-black hover:text-red-600 transition-colors font-sans"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    إفراغ الكل
+                  <span>Add to cart → check_out</span>
+                  <button onClick={clear} className="flex items-center gap-1.5 text-black hover:text-red-600 transition-colors font-sans">
+                    <Trash2 className="w-3.5 h-3.5" /> إفراغ الكل
                   </button>
                 </div>
-                {items.map((it, i) => (
-                  <CartEntry key={it.key} item={it} index={i} />
-                ))}
+                {items.map((it, i) => <CartEntry key={it.key} item={it} index={i} />)}
               </div>
 
               {/* الملخص */}
               <aside className="cart-bot lg:sticky lg:top-28 bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-7">
                 <h2 className="text-lg font-black uppercase tracking-wider">الملخص</h2>
-
                 <div className="mt-5 space-y-3 text-sm font-bold">
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-500">عدد العناصر</span>
-                    <span className="font-black tabular-nums" dir="ltr">{count}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-500">عدد الطلبات</span>
-                    <span className="font-black tabular-nums" dir="ltr">{items.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t-2 border-black">
-                    <span className="font-black">الإجمالي</span>
-                    <span className="text-3xl font-black tabular-nums" dir="ltr">
-                      {total.toFixed(2)}
-                      <span className="text-[11px] font-black text-neutral-500 mr-1">JOD</span>
-                    </span>
-                  </div>
+                  <div className="flex items-center justify-between"><span className="text-neutral-500">عدد العناصر</span><span className="font-black tabular-nums" dir="ltr">{count}</span></div>
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-black"><span className="font-black">الإجمالي</span><span className="text-3xl font-black tabular-nums" dir="ltr">{total.toFixed(2)}<span className="text-[11px] font-black text-neutral-500 mr-1">JOD</span></span></div>
                 </div>
 
                 <button
                   onClick={handleCheckout}
                   disabled={isSubmitting}
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#407BFF] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_#000] cursor-pointer"
+                  className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#407BFF] hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      جاري التنفيذ...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-5 h-5" />
-                      إتمام الطلب عبر بنك الاتحاد
-                    </>
-                  )}
+                  {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> جاري التنفيذ...</> : <><ShoppingCart className="w-5 h-5" /> إتمام الطلب الآن</>}
                 </button>
-
-                <p className="mt-4 text-[11px] font-bold text-neutral-500 leading-relaxed">
-                  {user ? (
-                    <>
-                      سيُرفق الطلب باسمك ورقمك ({user.name}
-                      {user.phone ? ` — ${user.phone}` : ''}).
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/auth" className="underline font-black text-black">سجّل دخولك</Link> ليُرفق الطلب باسمك ورقمك تلقائياً.
-                    </>
-                  )}
-                </p>
-
-                <div className="mt-5 flex items-center gap-2 text-[10px] font-mono font-black tracking-widest uppercase text-neutral-400">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#25D366]" />
-                  تفعيل فوري · ضمان كامل
-                </div>
               </aside>
             </div>
-          )}
-
-          {items.length > 0 && (
-            <p className="mt-14 text-center text-[10px] font-mono font-black tracking-[0.4em] uppercase text-neutral-400" dir="ltr">
-              BARQ CART v1.0 — NO REFUNDS AFTER 30 DAYS
-            </p>
           )}
         </div>
       </div>
 
       <Footer />
+
+      {/* البوب-أب الاحترافي بديل הـ alert */}
+      {popup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" dir="rtl">
+          <div className="relative w-full max-w-sm bg-white text-black border-2 border-black shadow-[10px_10px_0px_#000] p-8 text-center animate-in fade-in zoom-in duration-200">
+            
+            {/* الأيقونة حسب الحالة */}
+            <div className="flex justify-center mb-4">
+              {popup.type === 'success' && <CheckCircle className="w-16 h-16 text-[#25D366]" />}
+              {popup.type === 'error' && <AlertTriangle className="w-16 h-16 text-red-500" />}
+              {popup.type === 'login' && <ShieldCheck className="w-16 h-16 text-[#407BFF]" />}
+            </div>
+
+            <h3 className="text-2xl font-black mb-3">{popup.title}</h3>
+            <p className="text-sm font-bold text-neutral-600 leading-relaxed mb-8">{popup.text}</p>
+            
+            <div className="flex flex-col gap-3">
+              {popup.type === 'success' && (
+                <button onClick={() => { setPopup(null); navigate('/profile'); }} className="w-full bg-black text-white py-3.5 border-2 border-black font-black uppercase hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]">
+                  الانتقال لرفع الإيصال
+                </button>
+              )}
+              {popup.type === 'login' && (
+                <button onClick={() => { setPopup(null); navigate('/auth'); }} className="w-full bg-black text-white py-3.5 border-2 border-black font-black uppercase hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]">
+                  تسجيل الدخول
+                </button>
+              )}
+              <button onClick={() => setPopup(null)} className="w-full bg-white text-black py-3 border-2 border-black font-black uppercase hover:bg-neutral-100 transition-colors">
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </main>
   );
 }
