@@ -67,7 +67,6 @@ function AddToCartButton({ p, g, item }) {
               setShow(false);
             }}
           >
-            {/* 🔥 تمت إضافة text-black هنا لضمان وضوح الألوان */}
             <div
               className="relative w-full max-w-md bg-white text-black border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-8 animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
@@ -131,7 +130,7 @@ function AddToCartButton({ p, g, item }) {
 }
 
 // ==========================================
-// 2. باقي الأكواد كما هي
+// 2. باقي الأكواد 
 // ==========================================
 
 function useDragScroll() {
@@ -222,7 +221,8 @@ function TierRow({ p, g, gi }) {
 
             <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-neutral-500 truncate">{g.cat} · {p.name}</p>
+                {/* 🔥 التعديل تم هنا: إزالة truncate وإضافة line-clamp-2 و leading-relaxed */}
+                <p className="text-[10px] font-bold text-neutral-500 line-clamp-2 leading-relaxed break-words">{g.cat} · {p.name}</p>
                 <p className="mt-1 text-2xl md:text-3xl font-black tabular-nums" dir="ltr">
                   <span style={{ color: p.dark }}>{it.price}</span>
                   <span className="text-[10px] font-black text-neutral-500 ml-1">JOD</span>
@@ -249,7 +249,7 @@ export default function Products() {
     );
     gsap.from('.pto-hero-meta', { y: 30, opacity: 0, stagger: 0.1, delay: 0.4, duration: 0.8, ease: 'power3.out' });
 
-    const desktop = window.matchMedia('(min-width: 1024px)').matches;
+    const desktop = window.matchMedia('(min-width: 1024px)').matches && window.matchMedia('(pointer: fine)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     gsap.utils.toArray('.pto-word').forEach((el) => {
@@ -364,15 +364,19 @@ export default function Products() {
       });
     });
 
-    gsap.fromTo(
-      '.pto-progress',
-      { scaleX: 0 },
-      {
-        scaleX: 1,
-        ease: 'none',
-        scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
-      }
-    );
+    if (window.matchMedia('(pointer: fine)').matches) {
+      gsap.fromTo(
+        '.pto-progress',
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          ease: 'none',
+          scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+        }
+      );
+    } else {
+      gsap.set('.pto-progress', { opacity: 0 });
+    }
   }, { scope: mainRef });
 
   const jump = (i) => {

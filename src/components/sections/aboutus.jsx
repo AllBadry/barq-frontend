@@ -164,13 +164,14 @@ export default function AboutUs() {
   };
 
   useGSAP(() => {
+    // ملاحظة أداء هامة: تم إلغاء pin/scrub — فهي تخطف السكرول وتسبب
+    // تعلّقاً واضحاً على الجوال/الايباد (شعور "انتهت الصفحة").
+    // أصبح القسم يظهر بأنيميشن لمرة واحدة عند الوصول إليه بسلاسة تامة.
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: introRef.current,
-        start: 'top top',
-        end: '+=140%',
-        pin: true,
-        scrub: 1,
+        start: 'top 75%',
+        toggleActions: 'play none none none',
       },
     });
 
@@ -363,7 +364,7 @@ export default function AboutUs() {
             </Link>
             <span className="inline-flex items-center gap-2 text-xs font-bold text-neutral-500">
               <ShieldCheck className="w-4 h-4 text-[#e4f542]" />
-              أسعار بالدينار الأردني · دفع آمن عبر بنك الاتحاد
+              أسعار بالدينار الأردني · دفع آمن 
             </span>
           </div>
         </div>
@@ -402,7 +403,7 @@ export default function AboutUs() {
               <Package className="w-3 h-3" />
               كتالوج سريع
             </span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-5">إيه اللي بنبيعة من منّا؟</h2>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-5">شو الي نبيعه ؟</h2>
             <p className="mt-3 text-neutral-500 font-medium max-w-xl">كلها منتجات رقمية جاهزة تُفعّل فوراً — اختر ما يناسبك من هنا أو تكلّم معنا مباشرة.</p>
           </div>
           <Link

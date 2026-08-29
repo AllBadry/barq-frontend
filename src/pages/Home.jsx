@@ -45,8 +45,9 @@ export default function Home() {
 
   useGSAP(() => {
     // ===== Parallax عام: عنصر ب data-parallax يتحرك عند السكرول =====
-    // يعمل على الشاشات الكبيرة فقط — على الهاتف نعطّل حركة الخلفيات لتفادي اللاغ
-    const desktop = window.matchMedia('(min-width: 1024px)').matches;
+    // يعمل على أجهزة الكمبيوتر فقط (شاشة واسعة + مؤشر دقيق) —
+    // على الهاتف/الايباد نعطّل حركة الخلفيات لتفادي تعلّق السكرول.
+    const desktop = window.matchMedia('(min-width: 1024px)').matches && window.matchMedia('(pointer: fine)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!desktop || reduce) return;
 

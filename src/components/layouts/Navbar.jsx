@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -6,6 +6,8 @@ import { Search, ShoppingCart, User, Menu, X, Zap } from 'lucide-react';
 import SearchOverlay from './SearchOverlay';
 import { useCart } from '../../context/useCart';
 import { useAuth } from '../../context/useAuth';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const LINKS = [
   { to: '/#home', label: 'الرئيسية' },
@@ -15,6 +17,15 @@ const LINKS = [
 ];
 
 export default function Navbar() {
+
+  const [isOpen, setIsOpen] = useState(false); // حالة قائمة الجوال
+  const location = useLocation();
+
+  // هذا السطر يغلق القائمة فوراً عند الانتقال لأي صفحة
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
   const navRef = useRef();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

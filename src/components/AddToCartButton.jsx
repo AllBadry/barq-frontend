@@ -63,11 +63,11 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-black tracking-tighter">إلى أين تريد التوجيه؟</h3>
-              <p className="mt-1 text-sm font-bold text-neutral-500">
+              <p className="mt-1 text-sm font-bold text-neutral-800">
                 {item.qty} {g.cat} — {p.name}
                 {g.sub ? ` (${g.sub})` : ''}
               </p>
-              <label className="mt-4 block text-[11px] font-black uppercase tracking-widest text-neutral-500">
+              <label className="mt-4 block text-[11px] font-black uppercase tracking-widest text-neutral-900">
                 {guide.label}
               </label>
               <input
@@ -79,9 +79,9 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
                 dir="ltr"
                 autoFocus
                 placeholder={guide.placeholder}
-                className="mt-1 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#000]"
+                className="mt-1 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none placeholder:text-neutral-600 focus:shadow-[4px_4px_0px_#000]"
               />
-              <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">{guide.hint}</p>
+              <p className="mt-2 text-[11px] font-bold text-neutral-800 leading-relaxed">{guide.hint}</p>
               {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
               <div className="mt-5 flex gap-3">
                 <button

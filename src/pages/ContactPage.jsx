@@ -3,12 +3,14 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
-import { Send, MessageCircle, Mail, ArrowDown, Check, Plus, Zap, ArrowUpRight } from 'lucide-react';
+import { Send, MessageCircle, Mail, ArrowDown, Check, Plus, Zap, ArrowUpRight, Loader2 } from 'lucide-react';
 import { FaTelegramPlane, FaInstagram } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
+import { api } from '../lib/api';
+import { usePopup } from '../context/usePopup';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,7 +31,7 @@ const CHANNELS = [
     value: '@barqstore',
     dir: 'ltr',
     note: 'دعم مباشر عبر بوت التليغرام',
-    href: '#contact-form',
+    href: 'https://t.me/barqstore',
     bg: '#229ED9',
     tag: 'DIRECT',
   },
@@ -85,13 +87,42 @@ const MARQUEE_TAGS = ['رد فوري', '0100×1000', 'ضمان 30 يوم', 'دع
 
 export default function ContactPage() {
   const mainRef = useRef(null);
-  const [sent, setSent] = useState(false);
   const [open, setOpen] = useState(0);
+  
+  const [formData, setFormData] = useState({ name: '', phone: '', service: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { showPopup } = usePopup();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setIsSubmitting(true);
+    
+    try {
+      await api.request('/api/support/message', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setSent(true);
+      setFormData({ name: '', phone: '', service: '', message: '' });
+      
+      showPopup({
+        type: 'success',
+        title: 'تم إرسال رسالتك! 🚀',
+        text: 'تم تحويل استفسارك إلى فريق الدعم الفني، سنقوم بالرد عليك في أقرب وقت.',
+      });
+
+      setTimeout(() => setSent(false), 4000);
+    } catch (err) {
+      showPopup({
+        type: 'error',
+        title: 'عذراً!',
+        text: err.message || 'حدث خطأ أثناء الإرسال، الرجاء المحاولة مرة أخرى.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useGSAP(() => {
@@ -181,14 +212,15 @@ export default function ContactPage() {
             CONTACT — التواصل
           </span>
 
-          <h1 className="mt-10 leading-[1.05] tracking-tighter">
-            <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-black">راسلنا</span>
-            <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">
-              وفّر، وابدأ
+          {/* 🔥 الحل السحري: pt-8 و pb-8 مع إعطاء العنصر block لسحب المربع بالكامل */}
+          <h1 className="mt-8 leading-loose tracking-tighter">
+            <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-black pt-4 pb-2">راسلنا</span>
+            <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] pt-8 pb-8 -mt-6">
+              وفر، وابدأ
             </span>
           </h1>
 
-          <p className="ct-hero-meta mt-8 text-base sm:text-lg text-neutral-600 font-medium leading-relaxed max-w-xl mx-auto">
+          <p className="ct-hero-meta mt-2 text-base sm:text-lg text-neutral-600 font-medium leading-relaxed max-w-xl mx-auto">
             فريقنا متاح على مدار الساعة للإجابة عن استفساراتك، وعروض خاصة، أو استشارة مجانية قبل
             الشراء — اختر القناة الأنسب لك.
           </p>
@@ -299,6 +331,8 @@ export default function ContactPage() {
                       required
                       type="text"
                       placeholder="مثال: أحمد"
+                      value={formData.name}
+                      onChange={e => setFormData({...formData, name: e.target.value})}
                       className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#407BFF] transition-all"
                     />
                   </div>
@@ -309,6 +343,8 @@ export default function ContactPage() {
                       type="text"
                       pattern="[0-9+\(\)\- ]*"
                       placeholder="07XXXXXXXX"
+                      value={formData.phone}
+                      onChange={e => setFormData({...formData, phone: e.target.value})}
                       className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#25D366] transition-all"
                       dir="ltr"
                     />
@@ -316,10 +352,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="relative mt-5">
-                  <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">الخدمة المطلوبة</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-2">الخدمة المطلوبة (اختياري)</label>
                   <input
                     type="text"
                     placeholder="مثال: 5000 متابع إنستغرام مع ضمان"
+                    value={formData.service}
+                    onChange={e => setFormData({...formData, service: e.target.value})}
                     className="w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-all"
                   />
                 </div>
@@ -328,26 +366,25 @@ export default function ContactPage() {
                   required
                   rows="4"
                   placeholder="اكتب استفسارك أو تفاصيل طلبك..."
+                  value={formData.message}
+                  onChange={e => setFormData({...formData, message: e.target.value})}
                   className="relative w-full border-2 border-black px-4 py-3.5 font-bold placeholder:text-neutral-400 focus:outline-none focus:shadow-[4px_4px_0px_#FF3BFF] transition-all mt-5 resize-none"
                 ></textarea>
 
                 <div className="relative mt-7 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                   <button
                     type="submit"
+                    disabled={isSubmitting}
                     className={`flex-1 flex items-center justify-center gap-3 bg-black text-white font-black text-sm uppercase tracking-widest px-8 py-4 border-2 border-black shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:translate-x-0.5 hover:bg-[#111] transition-all duration-200 cursor-pointer ${
                       sent ? 'bg-[#25D366] text-black' : ''
-                    }`}
+                    } disabled:opacity-70`}
                   >
-                    {sent ? (
-                      <>
-                        <Check className="w-5 h-5" />
-                        تم استلام رسالتك بنجاح
-                      </>
+                    {isSubmitting ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> جاري الإرسال...</>
+                    ) : sent ? (
+                      <><Check className="w-5 h-5" /> تم استلام رسالتك</>
                     ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        أرسل الاستفسار
-                      </>
+                      <><Send className="w-5 h-5" /> أرسل الاستفسار</>
                     )}
                   </button>
                   <span className="text-xs font-bold text-neutral-500 text-center sm:text-right">
@@ -369,8 +406,9 @@ export default function ContactPage() {
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500">FAQ — أسئلة شائعة</span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight pb-4">
-            عندك سؤال؟ <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">جاوبناه.</span>
+          {/* 🔥 التعديل هنا: inline-block مع Padding يحمي النص المتدرج من القص */}
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-loose">
+            عندك سؤال؟ <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] inline-block pt-6 pb-6 -mb-6">جاوبناه.</span>
           </h2>
 
           <div className="mt-10 space-y-4">
@@ -405,8 +443,9 @@ export default function ContactPage() {
       {/* ============ خاتمة ============ */}
       <section className="relative bg-white overflow-hidden pt-20 md:pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-[0.95]">
-            النسخة التالية من <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">حضورك</span>
+          {/* 🔥 التعديل هنا: inline-block مع Padding يحمي الحروف الممتدة من الأسفل والأعلى */}
+          <h2 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-loose">
+            النسخة التالية من <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] inline-block pt-6 pb-6 -mb-6">حضورك</span>
           </h2>
           <p className="mt-8 text-base md:text-lg text-neutral-600 font-medium max-w-xl mx-auto leading-relaxed">
             تواصل معنا الآن واختر الباقة المناسبة لهدفك اليوم — فريقنا يهيّئ كل شيء لانطلاقة فورية.

@@ -36,17 +36,22 @@ export default function HeroSection() {
     }, '-=0.8');
 
     // ===== Parallax Scroll: طبقات الهيرو تتحرك بسرعات مختلفة أثناء السكرول =====
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1,
-      },
-    })
-      .to('.hero-text-layer', { y: 140, opacity: 0.3, ease: 'none', force3D: true }, 0)
-      .to('.hero-marquee', { y: -120, ease: 'none', force3D: true }, 0)
-      .to('.main-character', { y: 90, ease: 'none', force3D: true }, 0);
+    // يعمل على أجهزة الكمبيوتر فقط — على الجوال/الايباد نعطّله لتفادي
+    // تعلّق السكرول (التمرير المقيد بـ scrub باهظ على شاشات اللمس).
+    const isFine = window.matchMedia('(pointer: fine)').matches;
+    if (isFine) {
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      })
+        .to('.hero-text-layer', { y: 140, opacity: 0.3, ease: 'none', force3D: true }, 0)
+        .to('.hero-marquee', { y: -120, ease: 'none', force3D: true }, 0)
+        .to('.main-character', { y: 90, ease: 'none', force3D: true }, 0);
+    }
 
     // تحسين أداء الأشرطة — نحرّك transform على الـ GPU فقط،
     // ونتوقف مؤقتاً (pause) عندما يغادر الشريط مجال الرؤية لتفادي
