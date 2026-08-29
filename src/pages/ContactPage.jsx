@@ -99,18 +99,19 @@ export default function ContactPage() {
     setIsSubmitting(true);
     
     try {
+      // 🔥 توجيه الطلب إلى المسار المستقل للزوار بدلاً من التذاكر
       await api.request('/api/support/message', {
         method: 'POST',
-        body: formData,
+        body: formData, 
       });
 
       setSent(true);
-      setFormData({ name: '', phone: '', service: '', message: '' });
+      setFormData({ name: '', phone: '', email: '', message: '' });
       
       showPopup({
         type: 'success',
         title: 'تم إرسال رسالتك! 🚀',
-        text: 'تم تحويل استفسارك إلى فريق الدعم الفني، سنقوم بالرد عليك في أقرب وقت.',
+        text: 'تم تحويل استفسارك إلى فريقنا، وسنتواصل معك قريباً عبر الهاتف أو الإيميل.',
       });
 
       setTimeout(() => setSent(false), 4000);
