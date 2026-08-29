@@ -1,37 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Search, X, Zap, CornerDownLeft, ArrowRight, ShoppingCart, Check } from 'lucide-react';
-import { searchProducts, SUGGESTIONS, POPULAR } from '../../data/products';
+import { Search, X, Zap, CornerDownLeft, ArrowRight, ShoppingCart, Check, Loader2 } from 'lucide-react';
+import { api } from '../../lib/api'; // استدعاء API متجر برق
 import AddToCartButton from '../AddToCartButton';
 
-function ResultRow({ r }) {
-  const Icon = r.p.Icon;
+// مكون عرض صف النتيجة الفردي
+function ResultRow({ product }) {
+  // مطابقة بيانات المنتج القادمة من الداتا بيز مع ما يحتاجه زر السلة
+  const category = product.category || { name: 'متجر برق', enName: 'STORE', color: '#407BFF', dark: '#1d4ed8' };
+  
+  const formattedPlatform = {
+    id: category.slug || 'store',
+    name: category.name,
+    en: category.enName || 'STORE',
+    color: category.color || '#407BFF',
+    dark: category.dark || '#1d4ed8',
+    Icon: Zap
+  };
+
+  const formattedGroup = {
+    cat: product.groupName || product.name,
+    sub: product.subGroup || null,
+    badge: product.badge || null
+  };
+
+  const itemData = {
+    id: product._id,
+    qty: product.qty || '1,000',
+    price: product.price
+  };
+
   return (
-    <div
-      className="search-result-item group w-full flex items-center gap-4 p-3 text-right border-2 border-transparent hover:border-black hover:bg-neutral-50 cursor-default transition-all duration-150"
-    >
+    <div className="search-result-item group w-full flex items-center gap-4 p-3 text-right border-2 border-transparent hover:border-black hover:bg-neutral-50 cursor-default transition-all duration-150">
       <span
         className="relative w-11 h-11 shrink-0 rounded-md border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]"
-        style={{ background: r.p.color, color: r.p.dark }}
+        style={{ background: category.color || '#407BFF', color: category.dark || '#fff' }}
       >
-        <Icon className="w-5 h-5" />
+        <Zap className="w-5 h-5" />
       </span>
       <span className="flex-1 min-w-0">
         <span className="block font-black text-sm truncate">
-          {r.g.cat} — {r.p.name}
-          {r.g.sub ? <span className="text-neutral-400"> ({r.g.sub})</span> : null}
+          {product.name}
+          {product.subGroup ? <span className="text-neutral-400"> ({product.subGroup})</span> : null}
         </span>
         <span className="block text-[11px] font-bold text-neutral-500 mt-0.5" dir="ltr">
-          {r.item.qty} · {r.p.en}/{r.g.cat}
+          {product.qty} · {category.enName || 'STORE'} / {category.name}
         </span>
       </span>
       <span className="shrink-0 flex items-center gap-2">
         <span className="text-lg font-black tabular-nums" dir="ltr">
-          {r.item.price}
+          {product.price}
           <span className="text-[10px] text-neutral-500 mr-1">JOD</span>
         </span>
-        <AddToCartButton p={r.p} g={r.g} item={r.item} compact />
+        <AddToCartButton p={formattedPlatform} g={formattedGroup} item={itemData} compact />
       </span>
     </div>
   );
@@ -42,8 +64,12 @@ export default function SearchOverlay({ onClose }) {
   const cardRef = useRef(null);
   const inputRef = useRef(null);
   const listRef = useRef(null);
-  const [query, setQuery] = useState('');
 
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // أنيميشن الفتح والإغلاق
   useGSAP(() => {
     gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
     gsap.fromTo(
@@ -54,6 +80,7 @@ export default function SearchOverlay({ onClose }) {
     requestAnimationFrame(() => inputRef.current?.focus());
   }, { scope: rootRef });
 
+  // إغلاق النافذة عبر زر ESC
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') onClose();
@@ -62,22 +89,43 @@ export default function SearchOverlay({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  // جلب النتائج من الباك إند مع تأخير زمني (Debounce) لمنع الطلبات المفرطة
   useEffect(() => {
-    gsap.fromTo(
-      listRef.current?.querySelectorAll('.search-result-item'),
-      { y: 18, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.45, stagger: 0.04, ease: 'power3.out', overwrite: true }
-    );
+    if (!query.trim()) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.request(`/api/products/search?q=${encodeURIComponent(query)}`, { method: 'GET' });
+        if (res && res.data) {
+          setResults(res.data.products || []);
+        }
+      } catch (err) {
+        console.error('فشل البحث في السيرفر:', err);
+      } finally {
+        setLoading(false);
+      }
+    }, 300); // تأخير 300 ملي ثانية أثناء الكتابة
+
+    return () => clearTimeout(timer);
   }, [query]);
 
-  const results = searchProducts(query);
+  // أنيميشن ظهور النتائج عند تغيرها
+  useEffect(() => {
+    if (listRef.current) {
+      gsap.fromTo(
+        listRef.current.querySelectorAll('.search-result-item'),
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, stagger: 0.04, ease: 'power3.out', overwrite: true }
+      );
+    }
+  }, [results, query]);
+
   const showSuggestions = query.trim() === '';
-
-  const pick = (r) => {
-    onClose();
-  };
-
-  const list = showSuggestions ? POPULAR : results;
 
   return (
     <div ref={rootRef} dir="rtl" className="fixed inset-0 z-[130] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 md:pt-28 px-4" role="dialog" aria-modal="true">
@@ -92,25 +140,9 @@ export default function SearchOverlay({ onClose }) {
           </span>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-black uppercase tracking-widest">Barbot — البحث في المنتجات</p>
-            <p className="text-[10px] text-white/60 font-bold mt-0.5">اكتب ما تريد، ثم أكمل عبر السلة والدفع</p>
+            <p className="text-[10px] text-white/60 font-bold mt-0.5">ابحث عن أي باقة في متجر برق لحظياً</p>
           </div>
-          <span className="flex items-end gap-0.5 h-4">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="eq-bar w-1 bg-[#e4f542]" style={{ height: '100%', animationDelay: `${i * 0.12}s` }}></span>
-            ))}
-          </span>
-          {query && (
-            <button
-              onClick={() => {
-                setQuery('');
-                requestAnimationFrame(() => inputRef.current?.focus());
-              }}
-              className="h-9 shrink-0 flex items-center gap-1.5 border-2 border-white/30 hover:border-white hover:bg-white hover:text-black px-2.5 text-[11px] font-black uppercase tracking-wider text-white/80 transition-all"
-            >
-              <ArrowRight className="w-4 h-4" />
-              رجوع
-            </button>
-          )}
+          {loading && <Loader2 className="w-5 h-5 animate-spin text-[#e4f542]" />}
           <button
             onClick={onClose}
             className="w-9 h-9 shrink-0 border-2 border-white/30 hover:border-white hover:bg-white hover:text-black flex items-center justify-center transition-all"
@@ -127,7 +159,7 @@ export default function SearchOverlay({ onClose }) {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ابحث في المنتجات..."
+            placeholder="ابحث عن متابعين، مشاهدات، لايكات..."
             className={`w-full bg-white text-black font-black text-lg py-4 outline-none placeholder:text-neutral-300 transition-all ${query ? 'pr-20 pl-4' : 'pr-12 pl-4'}`}
           />
           {query && (
@@ -148,41 +180,20 @@ export default function SearchOverlay({ onClose }) {
           </kbd>
         </div>
 
-        {/* المحتوى */}
-        <div ref={listRef} className="overflow-y-auto flex-1">
+        {/* النتائج والمحتوى */}
+        <div ref={listRef} className="overflow-y-auto flex-1 p-4">
           {showSuggestions ? (
-            <>
-              <div className="px-5 pt-4">
-                <p className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">اقتراحات سريعة</p>
-                <div className="mt-2.5 flex flex-wrap gap-2">
-                  {SUGGESTIONS.map((s) => (
-                    <button
-                      key={s.q}
-                      onClick={() => setQuery(s.q)}
-                      className="px-3 py-1.5 border-2 border-black text-[11px] font-black shadow-[2px_2px_0px_#000] hover:bg-[#e4f542] transition-colors"
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-5 text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">الأكثر طلباً</p>
-              </div>
-              <div className="p-5 pt-3">
-                <div className="border-2 border-black divide-y-2 divide-black/10">
-                  {list.map((r, i) => (
-                    <ResultRow key={i} r={r} />
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : results.length ? (
-            <div className="p-4">
+            <div className="py-8 text-center text-neutral-400">
+              <p className="text-xs font-bold uppercase tracking-widest">ابدأ الكتابة للبحث عن الباقات في قاعدة البيانات...</p>
+            </div>
+          ) : results.length > 0 ? (
+            <div>
               <p className="px-2 pb-2 text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">
-                {results.length} نتيجة لـ «{query}»
+                {results.length} نتيجة مطابقة لـ «{query}»
               </p>
               <div className="border-2 border-black divide-y-2 divide-black/10">
-                {results.map((r, i) => (
-                  <ResultRow key={i} r={r} />
+                {results.map((product) => (
+                  <ResultRow key={product._id} product={product} />
                 ))}
               </div>
             </div>
@@ -193,7 +204,7 @@ export default function SearchOverlay({ onClose }) {
                   ∅
                 </span>
                 <p className="mt-4 font-black text-lg">لا توجد نتائج لـ «{query}»</p>
-                <p className="mt-1 text-sm font-bold text-neutral-500">جرّب: متابعون، مشاهدات، لايكات، إنستغرام...</p>
+                <p className="mt-1 text-sm font-bold text-neutral-500">تأكد من كتابة الكلمة بشكل صحيح أو جرّب كلمات أخرى.</p>
               </div>
             </div>
           )}
@@ -201,10 +212,10 @@ export default function SearchOverlay({ onClose }) {
 
         {/* التذييل */}
         <div className="px-5 py-3 border-t-2 border-black flex items-center justify-between text-[10px] font-mono font-black tracking-widest uppercase text-neutral-400 bg-neutral-50">
-          <span>BARQ SEARCH v1.0</span>
+          <span>BARQ LIVE SEARCH</span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 bg-[#25D366]"></span>
-            متصل بالبوت
+            <span className="w-2 h-2 bg-[#25D366] rounded-full animate-pulse"></span>
+            متصل بقاعدة البيانات
           </span>
         </div>
       </div>
