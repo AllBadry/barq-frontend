@@ -1,8 +1,9 @@
-import { useRef, useState, useEffect, createPortal } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom'; // 🔥 تم الإصلاح هنا
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X } from 'lucide-react'; // أضفنا X هنا
+import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X } from 'lucide-react';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
@@ -42,7 +43,7 @@ function AddToCartButton({ p, g, item }) {
       <button
         onClick={(e) => {
           e.preventDefault();
-          e.stopPropagation(); // 🔥 مهم جداً: يمنع تداخل الضغطة مع خاصية السحب
+          e.stopPropagation(); // 🔥 يمنع تداخل الضغطة مع خاصية السحب
           setShow(true);
         }}
         aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
@@ -60,7 +61,7 @@ function AddToCartButton({ p, g, item }) {
       {show &&
         createPortal(
           <div
-            dir="rtl" // 🔥 مهم جداً: لأن الـ Portal يخرج خارج الـ Main
+            dir="rtl"
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
             onClick={(e) => {
               e.stopPropagation();
@@ -128,7 +129,7 @@ function AddToCartButton({ p, g, item }) {
 }
 
 // ==========================================
-// 2. باقي الأكواد كما هي بدون تغيير
+// 2. باقي الأكواد كما هي
 // ==========================================
 
 function useDragScroll() {
