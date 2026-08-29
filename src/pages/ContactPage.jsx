@@ -212,7 +212,7 @@ export default function ContactPage() {
           <h1 className="mt-8 leading-loose tracking-tighter">
             <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-black pt-4 pb-2">راسلنا</span>
             <span className="ct-hero-line block text-6xl sm:text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542] pt-8 pb-8 -mt-6">
-              وفّر، وابدأ
+              وفر وابدأ
             </span>
           </h1>
 
