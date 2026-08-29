@@ -3,15 +3,24 @@ import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X } from 'lucide-react';
+import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X, Loader2 } from 'lucide-react';
+import { FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
 import Footer from '../components/layouts/Footer';
 import Seo from '../components/Seo';
-import { PLATFORMS, cartItem, linkGuide } from '../data/products';
+import { cartItem, linkGuide } from '../data/products';
 import { useCart } from '../context/useCart';
+import { api } from '../lib/api';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// 🔥 خريطة لتحويل النصوص القادمة من قاعدة البيانات إلى أيقونات React حقيقية
+const ICON_MAP = {
+  FaInstagram: FaInstagram,
+  FaFacebookF: FaFacebookF,
+  FaTiktok: FaTiktok
+};
 
 // ==========================================
 // 1. مكون زر الإضافة والبوب-أب 
@@ -130,9 +139,8 @@ function AddToCartButton({ p, g, item }) {
 }
 
 // ==========================================
-// 2. باقي الأكواد 
+// 2. دوال مساعدة للتمرير والصفوف 
 // ==========================================
-
 function useDragScroll() {
   const ref = useRef(null);
   useEffect(() => {
@@ -221,7 +229,6 @@ function TierRow({ p, g, gi }) {
 
             <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-3">
               <div className="min-w-0">
-                {/* 🔥 التعديل تم هنا: إزالة truncate وإضافة line-clamp-2 و leading-relaxed */}
                 <p className="text-[10px] font-bold text-neutral-500 line-clamp-2 leading-relaxed break-words">{g.cat} · {p.name}</p>
                 <p className="mt-1 text-2xl md:text-3xl font-black tabular-nums" dir="ltr">
                   <span style={{ color: p.dark }}>{it.price}</span>
@@ -237,11 +244,44 @@ function TierRow({ p, g, gi }) {
   );
 }
 
+// ==========================================
+// 3. المكون الرئيسي (Products Page)
+// ==========================================
 export default function Products() {
   const mainRef = useRef(null);
   const [active, setActive] = useState(0);
+  
+  // 🔥 حالات جلب البيانات
+  const [platforms, setPlatforms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // جلب البيانات من السيرفر عند تحميل الصفحة
+  useEffect(() => {
+    const fetchStorefrontData = async () => {
+      try {
+        const res = await api.request('/api/categories/storefront', { method: 'GET' });
+        if (res && res.data) {
+          // دمج الأيقونات وتسوية الـ ID ليتوافق مع السلة
+          const formattedData = res.data.map(p => ({
+            ...p,
+            id: p.platformId, // لضمان توافقها مع دالة السلة
+            Icon: ICON_MAP[p.IconName] || Zap
+          }));
+          setPlatforms(formattedData);
+        }
+      } catch (error) {
+        console.error('فشل جلب المنتجات من السيرفر:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStorefrontData();
+  }, []);
 
   useGSAP(() => {
+    // 🔥 حماية: لا تقم بتشغيل الأنيميشن إلا بعد جلب البيانات بالكامل
+    if (loading || platforms.length === 0) return;
+
     gsap.fromTo(
       '.pto-hero-line',
       { clipPath: 'inset(0 0 100% 0)' },
@@ -354,7 +394,7 @@ export default function Products() {
       if (badge) gsap.fromTo(badge, { scale: 0 }, { scale: 1, duration: 0.35, ease: 'back.out(2)', delay: 0.45 });
     });
 
-    PLATFORMS.forEach((p, i) => {
+    platforms.forEach((p, i) => {
       ScrollTrigger.create({
         trigger: `#platform-${p.id}`,
         start: 'top 55%',
@@ -377,12 +417,25 @@ export default function Products() {
     } else {
       gsap.set('.pto-progress', { opacity: 0 });
     }
-  }, { scope: mainRef });
+  }, { dependencies: [platforms, loading], scope: mainRef }); // تحديث الأنيميشن بناءً على البيانات
 
   const jump = (i) => {
     setActive(i);
-    document.getElementById(`platform-${PLATFORMS[i].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(`platform-${platforms[i].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  // 🔥 شاشة التحميل الفخمة
+  if (loading) {
+    return (
+      <main className="w-full min-h-screen bg-white flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none"></div>
+        <Loader2 className="w-12 h-12 md:w-16 md:h-16 animate-spin text-black mb-6" />
+        <h2 className="text-2xl md:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#407BFF] via-[#FF3BFF] to-[#e4f542]">
+          جاري إعداد المنتجات...
+        </h2>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -402,7 +455,7 @@ export default function Products() {
       </div>
 
       <aside className="fixed left-4 top-1/2 -translate-y-1/2 z-[110] hidden xl:flex flex-col items-center gap-3" dir="ltr">
-        {PLATFORMS.map((p, i) => {
+        {platforms.map((p, i) => {
           const Icon = p.Icon;
           return (
             <button
@@ -457,7 +510,7 @@ export default function Products() {
         <div dir="ltr" className="t-marquee flex w-max select-none">
           {[...Array(2)].map((_, k) => (
             <div key={k} className="flex items-center pl-8">
-              {PLATFORMS.map((p, i) => {
+              {platforms.map((p, i) => {
                 const bg = i === 0 ? '#FF3BFF' : i === 1 ? '#407BFF' : '#25F4EE';
                 return (
                   <span
@@ -475,7 +528,7 @@ export default function Products() {
         </div>
       </div>
 
-      {PLATFORMS.map((p) => {
+      {platforms.map((p) => {
         const Icon = p.Icon;
         return (
           <section key={p.id} id={`platform-${p.id}`} className="relative overflow-hidden border-t-4 border-black" style={{ background: p.bg }}>
