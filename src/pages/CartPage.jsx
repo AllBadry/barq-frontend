@@ -81,9 +81,8 @@ export default function CartPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [popup, setPopup] = useState(null); // لحفظ حالة البوب-أب (success, error, login)
+  const [popup, setPopup] = useState(null);
 
-  // دالة إتمام الشراء
   const handleCheckout = async () => {
     if (!user) {
       setPopup({ 
@@ -113,13 +112,13 @@ export default function CartPage() {
         body: orderData
       });
 
-      clear(); // إفراغ السلة
+      clear();
       setPopup({ 
         type: 'success', 
-        title: 'تم استلام طلبك! 🎉', 
-        text: 'راجع بريدك الإلكتروني لتفاصيل التحويل البنكي. يمكنك الآن الانتقال لصفحة طلباتك لرفع إيصال الدفع.' 
+        title: 'تم استلام طلبك بنجاح! 🎉', 
+        text: 'راجع بريدك الإلكتروني للاطلاع على تفاصيل الدفع (إن لم تجد الرسالة في صندوق الوارد، يُرجى التحقق من مجلد البريد المزعج / Spam). يمكنك الآن الانتقال لصفحة طلباتك لرفع إيصال السداد.' 
       });
-
+      
     } catch (err) {
       setPopup({ 
         type: 'error', 
@@ -133,8 +132,16 @@ export default function CartPage() {
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });
-    gsap.fromTo('.cart-bot', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out' });
-    gsap.fromTo('.cart-item', { x: () => (window.matchMedia('(min-width: 768px)').matches ? 34 : 0), opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' });
+    
+    const cartBots = gsap.utils.toArray('.cart-bot');
+    if (cartBots.length > 0) {
+      gsap.fromTo(cartBots, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out' });
+    }
+
+    const cartItems = gsap.utils.toArray('.cart-item');
+    if (cartItems.length > 0) {
+      gsap.fromTo(cartItems, { x: () => (window.matchMedia('(min-width: 768px)').matches ? 34 : 0), opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' });
+    }
   }, { scope: pageRef, dependencies: [items.length] });
 
   return (
@@ -173,7 +180,6 @@ export default function CartPage() {
             </div>
           ) : (
             <div className="mt-10 grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 md:gap-8 items-start">
-              {/* المنتجات */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-[11px] font-mono font-black tracking-widest uppercase text-neutral-400 px-1">
                   <span>Add to cart → check_out</span>
@@ -184,7 +190,6 @@ export default function CartPage() {
                 {items.map((it, i) => <CartEntry key={it.key} item={it} index={i} />)}
               </div>
 
-              {/* الملخص */}
               <aside className="cart-bot lg:sticky lg:top-28 bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6 md:p-7">
                 <h2 className="text-lg font-black uppercase tracking-wider">الملخص</h2>
                 <div className="mt-5 space-y-3 text-sm font-bold">
@@ -207,12 +212,9 @@ export default function CartPage() {
 
       <Footer />
 
-      {/* البوب-أب الاحترافي بديل הـ alert */}
       {popup && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" dir="rtl">
           <div className="relative w-full max-w-sm bg-white text-black border-2 border-black shadow-[10px_10px_0px_#000] p-8 text-center animate-in fade-in zoom-in duration-200">
-            
-            {/* الأيقونة حسب الحالة */}
             <div className="flex justify-center mb-4">
               {popup.type === 'success' && <CheckCircle className="w-16 h-16 text-[#25D366]" />}
               {popup.type === 'error' && <AlertTriangle className="w-16 h-16 text-red-500" />}
@@ -224,8 +226,15 @@ export default function CartPage() {
             
             <div className="flex flex-col gap-3">
               {popup.type === 'success' && (
-                <button onClick={() => { setPopup(null); navigate('/profile'); }} className="w-full bg-black text-white py-3.5 border-2 border-black font-black uppercase hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]">
-                  الانتقال لرفع الإيصال
+                <button 
+                  onClick={() => { 
+                    setPopup(null); 
+                    // 👈 التوجيه لصفحة البروفايل وتحديد تاب الطلبات تلقائياً
+                    navigate('/profile', { state: { tab: 'orders' } }); 
+                  }} 
+                  className="w-full bg-black text-white py-3.5 border-2 border-black font-black uppercase hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]"
+                >
+                  الانتقال لصفحة طلباتي
                 </button>
               )}
               {popup.type === 'login' && (

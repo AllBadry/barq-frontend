@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { User, Mail, Phone, Lock, Save, LogOut, Check, ShieldCheck, ShoppingCart, UserRound, ShoppingBag, Headset, Bell } from 'lucide-react';
@@ -109,12 +109,10 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
         noindex
       />
 
-      {/* التعديل هنا: زيادة الـ Padding العلوي (pt-40 md:pt-48) لكي لا يختبئ المحتوى أسفل التابات */}
       <div className="relative max-w-7xl mx-auto px-6 pt-40 md:pt-48 pb-20">
         <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true"></div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-6 md:gap-8 items-start">
-          {/* بطاقة الهوية */}
           <aside className="profile-bot bg-[#101314] text-white border-2 border-black shadow-[12px_12px_0px_#000] p-7 md:p-9 lg:sticky lg:top-36">
             <p className="text-[10px] font-mono font-black tracking-[0.35em] uppercase text-white/50">
               PROFILE / BARQ ID
@@ -162,7 +160,6 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
             </button>
           </aside>
 
-          {/* نموذج التعديل */}
           <section className="profile-bot relative bg-white border-2 border-black shadow-[12px_12px_0px_#000] p-6 md:p-10">
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
               بروفايلي
@@ -171,7 +168,7 @@ function ProfileInner({ user, updateProfile, logout, cartCount, verifyEmail, res
               </span>
             </h1>
             <p className="mt-3 text-sm font-bold text-neutral-500">
-               يمكنك تعديل اسمك ورقم هاتفك — أما بريدك الإلكتروني فهو ثابت بجزء من هويتك.
+                يمكنك تعديل اسمك ورقم هاتفك — أما بريدك الإلكتروني فهو ثابت بجزء من هويتك.
             </p>
 
             {!user.isEmailVerified && (
@@ -314,7 +311,8 @@ function TabBtn({ active, onClick, label, children }) {
 export default function ProfilePage() {
   const { user, loading, updateProfile, logout, verifyEmail, resendVerification } = useAuth();
   const { count } = useCart();
-  const [tab, setTab] = useState('profile');
+  const location = useLocation(); // 👈 استقبال حالة الحالة القادمة من المتصفح
+  const [tab, setTab] = useState(location.state?.tab || 'profile'); // 👈 فتح التبويب القادم من السلة أو الافتراضي
 
   if (loading) {
     return (
@@ -328,8 +326,6 @@ export default function ProfilePage() {
 
   return (
     <div>
-      {/* التعديل الأهم هنا: إزاحة التابات للأسفل لتبتعد عن الناف بار (top-[72px] md:top-[88px]) 
-          مع z-[40] لتنزلق تحت الناف بار عند التمرير، وإخفاء شريط التمرير لأناقة أكثر */}
       <div className="fixed top-[72px] md:top-[88px] left-0 right-0 z-[40] flex gap-2 overflow-x-auto bg-white/95 backdrop-blur-md border-b-2 border-black px-6 py-3 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabBtn active={tab === 'profile'} onClick={() => setTab('profile')} label="الملف الشخصي"><UserRound className="w-4 h-4" /></TabBtn>
         <TabBtn active={tab === 'orders'} onClick={() => setTab('orders')} label="طلباتي"><ShoppingBag className="w-4 h-4" /></TabBtn>
