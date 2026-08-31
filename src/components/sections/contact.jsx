@@ -17,7 +17,7 @@ const CHANNELS = [
     icon: MessageCircle,
     label: 'الدعم الفني',
     value: 'نظام التذاكر',
-    note: 'الطريقة الرسمية للتواصل — مربوطة بالبوت',
+    note: 'الطريقة الرسمية للتواصل ',
     href: '#contact-form',
     bg: '#111111',
   },
