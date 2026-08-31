@@ -247,10 +247,20 @@ export default function OrdersPanel() {
             <p className="text-xs font-bold text-neutral-500 mb-2 leading-relaxed">
               يرجى إرفاق صورة لحوالة كليك (CliQ) لإتمام الطلب.
             </p>
-            <p>
-              جهة التحويل: <span className="font-black">بنك الاتحاد</span>الاسم المستعار للتحويل SIK12 اسم المستفيد علاء السكسك
-            </p>
-
+            <div className="space-y-2 text-sm font-bold text-neutral-800 bg-neutral-50 p-4 border-2 border-black shadow-[3px_3px_0px_#000]">
+  <div className="flex items-center justify-between">
+    <span className="text-neutral-500 text-xs font-mono uppercase">جهة التحويل</span>
+    <span className="font-black text-black">بنك الاتحاد</span>
+  </div>
+  <div className="flex items-center justify-between">
+    <span className="text-neutral-500 text-xs font-mono uppercase">اسم المستفيد</span>
+    <span className="font-black text-black">علاء السكسك</span>
+  </div>
+  <div className="flex items-center justify-between pt-2 border-t border-black/10">
+    <span className="text-neutral-500 text-xs font-mono uppercase">معرف كليك (CliQ)</span>
+    <span className="font-mono font-black bg-black text-[#e4f542] px-2 py-0.5 tracking-widest text-sm" dir="ltr">SIK12</span>
+  </div>
+</div>
             <ReceiptForm
               data={uploadData}
               setData={setUploadData}
