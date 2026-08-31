@@ -35,9 +35,6 @@ export default function HeroSection() {
       ease: 'power3.out',
     }, '-=0.8');
 
-    // ===== Parallax Scroll: طبقات الهيرو تتحرك بسرعات مختلفة أثناء السكرول =====
-    // يعمل على أجهزة الكمبيوتر فقط — على الجوال/الايباد نعطّله لتفادي
-    // تعلّق السكرول (التمرير المقيد بـ scrub باهظ على شاشات اللمس).
     const isFine = window.matchMedia('(pointer: fine)').matches;
     if (isFine) {
       gsap.timeline({
@@ -53,9 +50,6 @@ export default function HeroSection() {
         .to('.main-character', { y: 90, ease: 'none', force3D: true }, 0);
     }
 
-    // تحسين أداء الأشرطة — نحرّك transform على الـ GPU فقط،
-    // ونتوقف مؤقتاً (pause) عندما يغادر الشريط مجال الرؤية لتفادي
-    // تعلّق السكرول السريع على الهاتف/الايباد (الأنيميشن المستمر باهظ).
     const setupMarquee = (ref, direction, duration) => {
       const track = ref.current;
       if (!track) return;
@@ -70,14 +64,13 @@ export default function HeroSection() {
           ease: 'none',
           force3D: true,
           repeat: -1,
-          paused: true, // نبدأ متوقفاً ونشغّله فور دخوله مجال الرؤية
+          paused: true,
           modifiers: {
             x: gsap.utils.unitize((x) => parseFloat(x) % singleWidth),
           },
         }
       );
 
-      // نتحكم في التشغيل/الإيقاف حسب وضوح عنصر الشريط
       if (typeof IntersectionObserver !== 'undefined') {
         const io = new IntersectionObserver(
           (entries) => {
@@ -86,7 +79,7 @@ export default function HeroSection() {
               else tween.pause();
             });
           },
-          { rootMargin: '100px 0px' } // حيّز إضافي حتى يبدأ قبل الوصول مباشرة
+          { rootMargin: '100px 0px' }
         );
         io.observe(track);
       } else {
@@ -101,7 +94,6 @@ export default function HeroSection() {
   }, { scope: containerRef });
 
   return (
-    // إضافة overflow-x-hidden لمنع أي تمرير جانبي نهائياً
     <section id="home" ref={containerRef} className="relative w-full bg-white text-black overflow-hidden overflow-x-hidden font-sans pt-24 md:pt-32 pb-16">
       
       <div className="hero-text-layer max-w-7xl mx-auto px-6 relative z-30 flex flex-col items-center">
@@ -111,11 +103,11 @@ export default function HeroSection() {
         >
           BAR
           <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.webp" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+            <img src="/mann.webp" alt="O" decoding="async" loading="lazy" className="w-full h-full object-cover object-top scale-125" />
           </span>
           <span className="hero-text-part">ST</span>
           <span className="hero-text-part inline-block w-[10vw] h-[10vw] sm:w-[8vw] sm:h-[8vw] md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-black align-middle shadow-lg bg-slate-100">
-            <img src="/mann.webp" alt="O" decoding="async" className="w-full h-full object-cover object-top scale-125" />
+            <img src="/mann.webp" alt="O" decoding="async" loading="lazy" className="w-full h-full object-cover object-top scale-125" />
           </span>
           <span className="hero-text-part">RE</span>
         </h1>
@@ -134,7 +126,6 @@ export default function HeroSection() {
       </div>
 
       <div className="relative w-full h-[330px] sm:h-[380px] md:h-[460px] mt-14 md:mt-8 flex items-center justify-center">
-        {/* الشريط يمتد أبعد من طرفي الشاشة بحيث تغطي زوايا دورانه العرض كامل */}
         <div className="hero-marquee absolute top-[68%] sm:top-[60%] md:top-[58%] -translate-y-1/2 left-[-7%] right-[-7%] h-[200px] sm:h-[250px] md:h-[300px] bg-[#111] rotate-[-3deg] overflow-hidden flex flex-col justify-center gap-4 z-10 border-y-4 border-black shadow-2xl">
           
           <div dir="ltr" className="flex w-max will-change-transform">
@@ -185,11 +176,14 @@ export default function HeroSection() {
         </div>
 
         <div className="main-character relative z-20 w-[80%] sm:w-[55%] md:w-[40%] max-w-[550px] flex justify-center mt-[-100px] sm:mt-[-210px] md:mt-[-260px]">
+          {/* 🔥 التعديل الجذري هنا: إزالة lazy وإضافة fetchpriority مع الأبعاد التقديرية */}
           <img 
             src="/mann.webp" 
             alt="Hero Character" 
-            loading="lazy"
+            fetchpriority="high"
             decoding="async"
+            width="550"
+            height="770"
             className="w-full h-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
           />
         </div>

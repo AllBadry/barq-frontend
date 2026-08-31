@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#ffffff" />
     <meta name="robots" content="index, follow" />
 
-    <!-- 🌟 تسريع تحميل الخطوط (حل مشكلة حظر العرض الجذري) -->
+    <!-- 🌟 تسريع تحميل الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -95,6 +95,18 @@
   <body class="font-['Cairo'] antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script src="https://api.mosaned.org/mosaned-widget.js" data-widget-key="a191fbb1f655b813bc1c688398ef1aa5aa5cac68"></script>
+    
+    <!-- 🔥 التعديل الجذري هنا: حقن وتأخير سكربت الشات لكي لا يسبب أي بطء في الهاتف -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var script = document.createElement('script');
+          script.src = "https://api.mosaned.org/mosaned-widget.js";
+          script.setAttribute("data-widget-key", "a191fbb1f655b813bc1c688398ef1aa5aa5cac68");
+          script.async = true;
+          document.body.appendChild(script);
+        }, 2000); // تأخير التشغيل ثانيتين بعد اكتمال الواجهة
+      });
+    </script>
   </body>
 </html>
