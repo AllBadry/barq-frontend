@@ -100,17 +100,18 @@ export default function AuthPage() {
   };
 
   const handleResend = async () => {
-    setError('');
-    setResending(true);
-    try {
-      const data = await resendVerification();
-      setError(data?.message ? `✔ ${data.message}` : 'تم إرسال رمز جديد إلى بريدك');
-    } catch (err) {
-      setError(err.message || 'تعذّر إعادة إرسال الرمز');
-    } finally {
-      setResending(false);
-    }
-  };
+  setError('');
+  setResending(true);
+  try {
+    // هنا نقوم بإرسال الإيميل للدالة
+    const data = await resendVerification({ email: verifyAddr || email });
+    setError(data?.message ? `✔ ${data.message}` : 'تم إرسال رمز جديد إلى بريدك');
+  } catch (err) {
+    setError(err.message || 'تعذّر إعادة إرسال الرمز');
+  } finally {
+    setResending(false);
+  }
+};
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });

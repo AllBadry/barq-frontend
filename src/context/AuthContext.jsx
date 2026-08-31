@@ -75,8 +75,11 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const resendVerification = async () => {
-    const res = await api.request('/api/auth/resend-verification', { method: 'POST' });
+  const resendVerification = async (data) => {
+    const res = await api.request('/api/auth/resend-verification', { 
+      method: 'POST',
+      body: data // هنا نقوم بتمرير الإيميل للباك إند
+    });
     return res.data;
   };
 
