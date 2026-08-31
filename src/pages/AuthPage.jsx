@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Zap, Mail, Lock, User, Phone, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
+import { Zap, Mail, Lock, User, Phone, ArrowLeft, ShieldCheck, Sparkles, Bell, MessageSquareText, Package } from 'lucide-react';
 import { FaInstagram, FaTiktok } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
@@ -77,7 +77,6 @@ export default function AuthPage() {
       }
     } catch (err) {
       const msg = err.message || 'حدث خطأ أثناء العملية';
-      // إن كان الحساب غير مفعل، السيرفر أرسل رمزاً جديداً — نوجّه لشاشة التفعيل
       if (isLogin && /تفعيل|verify/i.test(msg)) {
         setVerifyAddr(email);
         setMode('verify');
@@ -100,18 +99,17 @@ export default function AuthPage() {
   };
 
   const handleResend = async () => {
-  setError('');
-  setResending(true);
-  try {
-    // هنا نقوم بإرسال الإيميل للدالة
-    const data = await resendVerification({ email: verifyAddr || email });
-    setError(data?.message ? `✔ ${data.message}` : 'تم إرسال رمز جديد إلى بريدك');
-  } catch (err) {
-    setError(err.message || 'تعذّر إعادة إرسال الرمز');
-  } finally {
-    setResending(false);
-  }
-};
+    setError('');
+    setResending(true);
+    try {
+      const data = await resendVerification({ email: verifyAddr || email });
+      setError(data?.message ? `✔ ${data.message}` : 'تم إرسال رمز جديد إلى بريدك');
+    } catch (err) {
+      setError(err.message || 'تعذّر إعادة إرسال الرمز');
+    } finally {
+      setResending(false);
+    }
+  };
 
   useGSAP(() => {
     gsap.fromTo(pageRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' });
@@ -175,13 +173,12 @@ export default function AuthPage() {
       <Navbar />
       <Seo
         title="دخول النظام | متجر برق — حساباتك كلها بضغطة"
-        description="سجّل دخولك أو أنشئ حساباً جديداً في متجر برق لمتابعة طلباتك وأكوادك على إنستغرام وفيسبوك وتيك توك."
+        description="سجّل دخولك أو أنشئ حساباً جديداً في متجر برق لمتابعة طلباتك والإشعارات والتواصل مع الدعم الفني."
         path="/auth"
         noindex
       />
 
       <div className="relative max-w-7xl mx-auto px-6 py-14 md:py-20">
-        {/* شبكة خلفية */}
         <div className="absolute inset-0 dot-grid opacity-30" aria-hidden="true"></div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-6 md:gap-8 items-stretch">
@@ -192,7 +189,6 @@ export default function AuthPage() {
             <div className="absolute -bottom-28 -left-28 w-80 h-80 rounded-full shape-spin-rev" style={{ ['--r']: '26s', background: BLOB }}></div>
 
             <div ref={brandInnerRef} className="relative flex-1 flex flex-col p-7 md:p-10">
-              {/* الشعار الكبير */}
               <div className="flex items-center gap-4">
                 <span className="orbit-spin w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-[#e4f542] bg-black flex items-center justify-center" style={{ ['--r']: '16s' }}>
                   <Zap className="w-8 h-8 md:w-9 md:h-9 text-[#e4f542] fill-current" />
@@ -202,16 +198,15 @@ export default function AuthPage() {
                     BARQ<span className="text-[#e4f542]"> STORE</span>
                   </p>
                   <p className="text-[10px] font-mono font-black tracking-[0.35em] uppercase text-white/50 mt-1">
-                    Growth · Followers · Fire
+                    Support · Orders · Notifications
                   </p>
                 </div>
               </div>
 
-              {/* جملة الترحيب */}
               <div className="mt-10 md:mt-14">
                 <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#e4f542]/40 text-[#e4f542] text-[10px] font-black uppercase tracking-[0.3em]">
                   <Sparkles className="w-3 h-3" />
-                  نظام حسابات بَرْق
+                  بوابة عملاء بَرْق
                 </span>
                 <h1 className="mt-7 text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tighter">
                   حساباتك
@@ -220,22 +215,28 @@ export default function AuthPage() {
                     كلها بضغطة
                   </span>
                 </h1>
+                {/* 🔥 النص المحدث ليعكس الهدف الحقيقي لتسجيل الدخول */}
                 <p className="mt-6 max-w-sm text-sm md:text-base font-medium text-white/60 leading-relaxed">
-                  تابع طلباتك، اسحب أكوادك، وراقب نمو حساباتك على إنستغرام وفيسبوك وتيك توك كلها من مكان واحد.
+                  تابع طلباتك، استقبل الإشعارات الفورية، وتحدث مع الدعم الفني مباشرة بعد تسجيل الدخول.
                 </p>
               </div>
 
-              {/* مميزات سريعة */}
               <ul className="mt-8 md:mt-10 space-y-2.5 text-xs font-bold text-white/70 max-w-sm">
-                {['فلترة فورية لكل طلباتك', 'تأكيد تسليم لحظي عبر الإشعارات', '100% حفظ للبيانات تشفيراً'].map((t) => (
-                  <li key={t} className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-[#e4f542] shrink-0" />
-                    {t}
-                  </li>
-                ))}
+                {[
+                  { text: 'متابعة حالة الطلبات لحظة بلحظة', icon: Package },
+                  { text: 'تنبيهات وإشعارات فورية عبر النظام', icon: Bell },
+                  { text: 'دعم فني مباشر وسريع على مدار الساعة', icon: MessageSquareText },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.text} className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4 text-[#e4f542] shrink-0" />
+                      {item.text}
+                    </li>
+                  );
+                })}
               </ul>
 
-              {/* أيقونات عائمة + موسيقى */}
               <div className="mt-auto pt-8 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   {[FaInstagram, FaTiktok].map((Ic, i) => (
@@ -244,7 +245,7 @@ export default function AuthPage() {
                     </span>
                   ))}
                 </div>
-                <div className="flex items-end gap-1 h-8" dir="ltr">
+                <div className="flex end gap-1 h-8" dir="ltr">
                   {[4, 7, 5, 9, 6, 8, 5].map((h, i) => (
                     <span key={i} className="eq-bar w-1.5 bg-gradient-to-t from-[#407BFF] to-[#FF3BFF]" style={{ height: `${h * 10}%`, animationDelay: `${i * 0.13}s` }}></span>
                   ))}
@@ -255,7 +256,6 @@ export default function AuthPage() {
 
           {/* ====== نموذج الدخول/الحساب ====== */}
           <section className="relative bg-white border-2 border-black shadow-[12px_12px_0px_#000] p-6 md:p-10 lg:p-12 flex items-center">
-            {/* علامة مائية ضخمة */}
             <span
               ref={watermarkRef}
               dir="ltr"
@@ -270,7 +270,6 @@ export default function AuthPage() {
                 AUTH / {isLogin ? '01' : '02'}
               </div>
 
-              {/* ====== زر التبديل الرهيب ====== */}
               <div className="auth-bot-appear relative mt-4 grid grid-cols-2 border-2 border-black bg-white select-none">
                 <span ref={pillRef} className="absolute inset-y-0 right-0 w-1/2 bg-black z-0 overflow-hidden">
                   <span className="absolute inset-0 bg-gradient-to-l from-[#407BFF] via-[#FF3BFF] to-purple-500 opacity-80"></span>
@@ -290,7 +289,6 @@ export default function AuthPage() {
                 </button>
               </div>
 
-              {/* العنوان المتغير */}
                <h2 ref={headingRef} className="mt-9 text-4xl md:text-5xl font-black tracking-tighter leading-none">
                  {showVerify ? (
                    <>
@@ -313,11 +311,10 @@ export default function AuthPage() {
                  {showVerify
                    ? 'أدخلنا رمز التفعيل في بريدك الإلكتروني لإكمال التسجيل.'
                    : isLogin
-                   ? 'سجّل دخولك للمتابعة من حيث توقفت.'
-                   : 'دقيقة واحدة وتبدأ التوفير والتتبع.'}
+                   ? 'سجّل دخولك لمتابعة طلباتك وإشعاراتك.'
+                   : 'دقيقة واحدة وتمتلك حساباً لمتابعة كل خدماتك.'}
                </p>
 
-{/* الحقول */}
                {showVerify ? (
                  <form onSubmit={handleVerify} className="auth-body mt-8 space-y-4">
                    <div>
@@ -462,14 +459,12 @@ export default function AuthPage() {
                </form>
                )}
 
-               {/* الفاصل */}
               <div className="auth-bot-appear mt-7 flex items-center gap-3">
                 <span className="flex-1 h-0.5 bg-black/10"></span>
                 <span className="text-[10px] font-mono font-black tracking-[0.3em] uppercase text-neutral-400">أو</span>
                 <span className="flex-1 h-0.5 bg-black/10"></span>
               </div>
 
-              {/* زر جوجل (واجهة فقط — غير مفعّل بعد) */}
               <div className="auth-bot-appear mt-6">
                 <button
                   type="button"
@@ -485,7 +480,7 @@ export default function AuthPage() {
               </div>
 
               <p className="auth-bot-appear mt-8 text-[10px] font-mono font-black tracking-widest uppercase text-neutral-300 text-center">
-                بتسجيلك فأنت توافق على شروط الاستخدام الخدمة — Frontend only v0.1
+                بتسجيلك فأنت توافق على شروط الخدمة — Frontend only v0.1
               </p>
             </div>
           </section>

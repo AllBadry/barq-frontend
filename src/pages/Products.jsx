@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom'; // 👈 إضافة هذا لالتقاط الهاش
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -193,35 +194,36 @@ function TierRow({ p, g, gi }) {
 // ==========================================
 // 🔥 3. مكون الـ Lazy Loading (غلاف ذكي للمنصة)
 // ==========================================
-function LazyPlatform({ p, index, setActive }) {
+function LazyPlatform({ p, index, setActive, initialVisible }) {
   const sectionRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(initialVisible); // 👈 تحميل القسم فوراً إذا كان الهدف هو الـ Hash الخاص به
   const Icon = p.Icon;
 
   // 1. مراقبة اقتراب المستخدم من القسم
   useEffect(() => {
+    if (isVisible) return; // لا تراقب إذا كان مرئياً بالفعل
+
     const observer = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.disconnect(); // إيقاف المراقبة بعد أول ظهور
+          observer.disconnect(); 
         }
       },
-      { rootMargin: '800px 0px' } // تحميله عندما يكون على بعد 800 بكسل (لتحميل سلس)
+      { rootMargin: '800px 0px' }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [isVisible]);
 
   // 2. تطبيق GSAP الخاص بالمنصة فقط عند ظهورها
   useGSAP(() => {
-    if (!isVisible) return; // لا تفعل شيء إذا لم يتم التحميل
+    if (!isVisible) return; 
 
     const el = sectionRef.current;
     const desktop = window.matchMedia('(min-width: 1024px)').matches && window.matchMedia('(pointer: fine)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mobile = window.matchMedia('(max-width: 767px)').matches;
 
-    // تجهيز العناصر للأنيميشن
     gsap.utils.toArray(el.querySelectorAll('.pto-word')).forEach((word) => {
       gsap.from(word, { xPercent: 14, opacity: 0, duration: 1.2, ease: 'power4.out', scrollTrigger: { trigger: word, start: 'top 88%', once: true } });
       if (!desktop || reduce) return;
@@ -258,7 +260,6 @@ function LazyPlatform({ p, index, setActive }) {
       if (badge) gsap.fromTo(badge, { scale: 0 }, { scale: 1, duration: 0.35, ease: 'back.out(2)', delay: 0.45 });
     });
 
-    // مراقبة القائمة الجانبية (Sidebar)
     ScrollTrigger.create({
       trigger: el,
       start: 'top 55%',
@@ -267,7 +268,6 @@ function LazyPlatform({ p, index, setActive }) {
       onEnterBack: () => setActive(index),
     });
 
-    // إنعاش GSAP ليأخذ الارتفاعات الجديدة بعد التحميل
     setTimeout(() => ScrollTrigger.refresh(), 100);
 
   }, { dependencies: [isVisible], scope: sectionRef });
@@ -280,7 +280,6 @@ function LazyPlatform({ p, index, setActive }) {
         </div>
       ) : (
         <>
-          {/* كودك الأصلي تماماً بداخل القسم */}
           <span className="pto-word absolute -top-6 left-0 whitespace-nowrap leading-none font-black tracking-tighter select-none pointer-events-none" style={{ color: `${p.color}22`, fontSize: 'min(26vw, 340px)' }} dir="ltr" aria-hidden="true">
             {p.en}
           </span>
@@ -321,6 +320,7 @@ function LazyPlatform({ p, index, setActive }) {
 // 4. المكون الرئيسي (Products Page)
 // ==========================================
 export default function Products() {
+  const location = useLocation(); // 👈 لالتقاط الهاش من الـ URL
   const mainRef = useRef(null);
   const [active, setActive] = useState(0);
   const [platforms, setPlatforms] = useState([]);
@@ -342,6 +342,21 @@ export default function Products() {
     };
     fetchStorefrontData();
   }, []);
+
+  // 👈 التأكد من التمرير للهاش المطلوب بعد اكتمال جلب البيانات
+  useEffect(() => {
+    if (!loading && platforms.length > 0 && location.hash) {
+      setTimeout(() => {
+        const targetElement = document.querySelector(location.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // تحديث العنصر النشط بناءً على الهاش
+          const index = platforms.findIndex(p => `#platform-${p.id}` === location.hash);
+          if (index !== -1) setActive(index);
+        }
+      }, 300); // تأخير بسيط جداً للتأكد من ريندر العناصر
+    }
+  }, [loading, platforms, location.hash]);
 
   // أنيميشن الـ Hero يعمل مرة واحدة عند تحميل الصفحة
   useGSAP(() => {
@@ -437,10 +452,19 @@ export default function Products() {
         </div>
       </div>
 
-      {/* 🔥 هنا السحر: استدعاء الغلاف الذكي بدلاً من كتابة القسم مباشرة */}
-      {platforms.map((p, i) => (
-        <LazyPlatform key={p.id} p={p} index={i} setActive={setActive} />
-      ))}
+      {platforms.map((p, i) => {
+        // 👈 تمرير خاصية أن القسم مرئي افتراضياً إذا كان الهاش يطابقه
+        const isTargetSection = location.hash === `#platform-${p.id}`;
+        return (
+          <LazyPlatform 
+            key={p.id} 
+            p={p} 
+            index={i} 
+            setActive={setActive} 
+            initialVisible={isTargetSection} // جعل القسم المستهدف مرئياً قبل الوصول إليه
+          />
+        );
+      })}
 
       <Footer />
     </main>
