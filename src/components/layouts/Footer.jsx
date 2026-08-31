@@ -24,13 +24,13 @@ const PLATFORMS = [
 
 const CONTACTS = [
   { icon: FaPhone, label: 'رقم الهاتف', value: '0785151865', href: 'tel:962785151865' },
-  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@BaarqStore', href: 't.me/BaarqStore' },
+  { icon: FaTelegramPlane, label: 'تيلغرام', value: '@BaarqStore', href: 'https://t.me/BaarqStore' },
   { icon: Mail, label: 'البريد الإلكتروني', value: 'support@barqstore.org', href: 'mailto:support@barqstore.org' },
   { icon: Clock, label: 'الدعم الفني', value: 'متاح 24/7 على مدار الأسبوع', href: '/contact' },
 ];
 
 const SOCIALS = [
-  { icon: FaTelegramPlane, href: 't.me/BaarqStore', label: 'تيلغرام' },
+  { icon: FaTelegramPlane, href: 'https://t.me/BaarqStore', label: 'تيلغرام' },
 ];
 
 export default function Footer() {
