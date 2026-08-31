@@ -6,6 +6,9 @@ import { Sparkles, Palette, Hexagon } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// 🔥 الحل الأول والأهم: منع GSAP من إعادة حساب المقاسات عند ظهور/اختفاء شريط عنوان Safari
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 export default function HeroSection() {
   const containerRef = useRef(null);
   const marquee1 = useRef(null);
@@ -35,8 +38,11 @@ export default function HeroSection() {
       ease: 'power3.out',
     }, '-=0.8');
 
-    const isFine = window.matchMedia('(pointer: fine)').matches;
-    if (isFine) {
+    // 🔥 الحل الثاني: التعرف الدقيق على أجهزة اللمس (الآيفون والآيباد) 
+    // لمنع تأثير Scrub الثقيل الذي يتعارض مع السحب الطبيعي بالإصبع
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    if (!isTouchDevice) {
       gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
@@ -176,7 +182,6 @@ export default function HeroSection() {
         </div>
 
         <div className="main-character relative z-20 w-[80%] sm:w-[55%] md:w-[40%] max-w-[550px] flex justify-center mt-[-100px] sm:mt-[-210px] md:mt-[-260px]">
-          {/* 🔥 التعديل الجذري هنا: إزالة lazy وإضافة fetchpriority مع الأبعاد التقديرية */}
           <img 
             src="/mann.webp" 
             alt="Hero Character" 
