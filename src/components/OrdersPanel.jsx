@@ -247,6 +247,9 @@ export default function OrdersPanel() {
             <p className="text-xs font-bold text-neutral-500 mb-2 leading-relaxed">
               يرجى إرفاق صورة لحوالة كليك (CliQ) لإتمام الطلب.
             </p>
+            <p>
+              جهة التحويل: <span className="font-black">بنك الاتحاد</span>الاسم المستعار للتحويل SIK12 اسم المستفيد علاء السكسك
+            </p>
 
             <ReceiptForm
               data={uploadData}
