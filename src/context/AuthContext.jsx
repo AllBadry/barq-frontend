@@ -69,9 +69,13 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: { code },
     });
-    // تحديث بيانات المستخدم بعد التفعيل
-    const me = await api.request('/api/auth/me');
-    if (me.data) setUser(me.data.user);
+    
+    // الباك إند الآن يرسل التوكن وبيانات المستخدم مباشرة عند نجاح التفعيل
+    if (res.data && res.data.accessToken) {
+      api.setToken(res.data.accessToken); // حفظ التوكن في المتصفح
+      setUser(res.data.user);             // تحديث حالة المستخدم في التطبيق
+    }
+    
     return res.data;
   };
 
