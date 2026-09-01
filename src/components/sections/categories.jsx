@@ -8,7 +8,7 @@ import { Sparkles, ShoppingCart, ArrowUpRight, Star } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-ScrollTrigger.config({ ignoreMobileResize: true });
+// 🔥 تم حذف ScrollTrigger.config لأنه مضاف في الملف الرئيسي Home.jsx
 
 const C = {
   blue: '#407BFF',
@@ -49,7 +49,6 @@ export default function Categories() {
     if (!section) return;
 
     try {
-      // 1) ترويسة القسم: الكلمات الضخمة تتساقط بتتابع
       gsap.fromTo(
         section.querySelectorAll('.giant-word'),
         { opacity: 0, x: -60, rotate: -2 },
@@ -68,7 +67,6 @@ export default function Categories() {
         }
       );
 
-      // 2) ليستأغرام - لوحة إعلانية تنقسم + صفوف تتتالي
       gsap.utils.toArray('.insta-block').forEach((el) => {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
@@ -98,7 +96,6 @@ export default function Categories() {
         );
       });
 
-      // 3) فيسبوك - تير لست تتساقط بتتابع مرن
       gsap.utils.toArray('.tier-block').forEach((el) => {
         gsap.fromTo(
           el,
@@ -120,7 +117,6 @@ export default function Categories() {
         );
       });
 
-      // 4) تيك توك - الكروت تبرز بترتيب حر بزوايا متنوعة
       gsap.utils.toArray('.cluster-block').forEach((el) => {
         gsap.fromTo(
           el.querySelectorAll('.cluster-card'),
@@ -137,7 +133,6 @@ export default function Categories() {
         );
       });
 
-      // 5) العدّادات تصعد
       gsap.utils.toArray('.offer-count').forEach((counter) => {
         const target = parseFloat(counter.dataset.count) || 0;
         const state = { v: 0 };
@@ -156,10 +151,8 @@ export default function Categories() {
         });
       });
 
-      if (window.addEventListener) {
-        window.addEventListener('load', ScrollTrigger.refresh);
-        return () => window.removeEventListener('load', ScrollTrigger.refresh);
-      }
+      // 🔥 تم حذف window.addEventListener('load', ScrollTrigger.refresh) الذي يسبب تعليق وإعادة حساب للمقاسات
+
     } catch (err) {
       console.warn('Categories animation error:', err);
     }
@@ -172,8 +165,6 @@ export default function Categories() {
       dir="rtl"
       className="relative w-full bg-white text-black overflow-x-hidden overflow-hidden"
     >
-
-      {/* ===== ترويسة القسم: كلمات ضخمة متراصة ===== */}
       <div data-parallax="0.4" className="section-head relative z-10 max-w-7xl mx-auto px-6 pt-28 md:pt-36 pb-6">
         <div className="inline-flex items-center gap-2 bg-[#e4f542] text-black px-6 py-3 rounded-full font-bold text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
           <Sparkles className="w-4 h-4" />
@@ -198,7 +189,6 @@ export default function Categories() {
         </p>
       </div>
 
-      {/* أشكال زخرفية ناعمة */}
       <div className="absolute inset-0 pointer-events-none" data-parallax="0.5">
         {floaters.map((f, i) => (
           <span
@@ -209,8 +199,8 @@ export default function Categories() {
         ))}
       </div>
 
-      {/* ============ 01 INSTAGRAM: لوحة إعلانية سبليت ============ */}
-      <div className="insta-block mount-anim-block relative z-10 max-w-6xl mx-auto px-6 pt-20 will-change-transform">
+      {/* 🔥 تم مسح كلاس will-change-transform من الحاويات لمنع انهيار ذاكرة الموبايل VRAM */}
+      <div className="insta-block mount-anim-block relative z-10 max-w-6xl mx-auto px-6 pt-20">
         <div className="flex items-center gap-4 mb-8">
           <span className="text-sm font-black" style={{ color: C.pink }}>01</span>
           <span className="h-2 flex-1" style={{ background: `linear-gradient(90deg, ${C.pink}, transparent)` }}></span>
@@ -221,7 +211,6 @@ export default function Categories() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-stretch">
-          {/* اللوحة الإعلانية */}
           <div className="insta-billboard relative rounded-3xl border-2 border-black bg-white overflow-hidden shadow-[10px_10px_0px_#000] p-8 flex flex-col justify-between min-h-[420px]">
             <span className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-20" style={{ background: C.pink }}></span>
             <span className="absolute top-8 right-8 text-[10rem] font-black leading-none text-black/[0.06] select-none">1</span>
@@ -255,7 +244,6 @@ export default function Categories() {
             </Link>
           </div>
 
-          {/* عروض إنستغرام */}
           <div className="insta-rows flex flex-col justify-center gap-4">
             {offerRows.map((of, idx) => (
               <div key={idx} className="insta-row group flex items-center gap-4 rounded-2xl border-2 border-black bg-white p-5 shadow-[4px_4px_0px_#000] transition-all duration-300 hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000] cursor-pointer">
@@ -282,8 +270,7 @@ export default function Categories() {
         </div>
       </div>
 
-      {/* ============ 02 FACEBOOK: تير لست كاملة العرض ============ */}
-      <div className="tier-block mount-anim-block relative z-10 max-w-5xl mx-auto px-6 pt-28 will-change-transform">
+      <div className="tier-block mount-anim-block relative z-10 max-w-5xl mx-auto px-6 pt-28">
         <div className="flex items-center gap-4 mb-10">
           <span className="text-sm font-black" style={{ color: C.blue }}>02</span>
           <span className="h-2 flex-1" style={{ background: `linear-gradient(90deg, ${C.blue}, transparent)` }}></span>
@@ -293,7 +280,6 @@ export default function Categories() {
           </span>
         </div>
 
-        {/* شعار فيسبوك المتراكب */}
         <div className="flex justify-center -mt-4 mb-10">
           <div className="relative w-28 h-28 rounded-2xl bg-white border-[3px] border-black shadow-[8px_8px_0px_#000] flex items-center justify-center -rotate-3 drifty" style={{ ['--dd']: '7s' }}>
             <span className="absolute inset-2 rounded-xl" style={{ background: `linear-gradient(135deg, ${C.blue}, #0f2c66)` }}></span>
@@ -304,7 +290,6 @@ export default function Categories() {
         </div>
 
         <div className="relative">
-          {/* علامة مائية خلفية */}
           <FaFacebookF className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 text-[#407BFF] opacity-[0.05] -z-[1] pointer-events-none select-none" data-parallax="-0.35" />
           <div className="space-y-5">
           {tiers.map((t, idx) => (
@@ -356,7 +341,7 @@ export default function Categories() {
           </div>
         </div>
       </div>
-      <div className="cluster-block mount-anim-block relative z-10 max-w-6xl mx-auto px-6 pt-28 pb-4 will-change-transform">
+      <div className="cluster-block mount-anim-block relative z-10 max-w-6xl mx-auto px-6 pt-28 pb-4">
         <div className="flex items-center gap-4 mb-10">
           <span className="text-sm font-black" style={{ color: '#8a7a00' }}>03</span>
           <span className="h-2 flex-1" style={{ background: `linear-gradient(90deg, #d4c300, transparent)` }}></span>
@@ -366,7 +351,6 @@ export default function Categories() {
           </span>
         </div>
 
-        {/* علامة مائية خلفية */}
         <FaTiktok className="absolute top-8 left-1/2 -translate-x-1/2 w-96 h-96 text-black opacity-[0.04] -z-[1] pointer-events-none select-none" data-parallax="-0.3" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start relative z-[1]">

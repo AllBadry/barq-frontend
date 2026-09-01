@@ -29,7 +29,6 @@ const STATS = [
 const MARQUEE = ['متابعون مضمونون', 'مشاهدات ريلز', 'لايكات وتفاعل', 'اشتراكات نمو شهرية', 'ضمان 30 يوم', 'تفعيل فوري', 'دعم بالعربي 24/7'];
 
 const CARDS = [
-  
   {
     icon: Users,
     title: 'متابعون مضمونون',
@@ -154,9 +153,6 @@ export default function AboutUs() {
   };
 
   useGSAP(() => {
-    // ملاحظة أداء هامة: تم إلغاء pin/scrub — فهي تخطف السكرول وتسبب
-    // تعلّقاً واضحاً على الجوال/الايباد (شعور "انتهت الصفحة").
-    // أصبح القسم يظهر بأنيميشن لمرة واحدة عند الوصول إليه بسلاسة تامة.
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: introRef.current,
@@ -165,7 +161,6 @@ export default function AboutUs() {
       },
     });
 
-    // كلمات المقدمة: كشف بستارة clip-path — بلا قصّ للحروف العربية
     tl.fromTo(
       '.about-word',
       { clipPath: 'inset(0 0 100% 0)', y: 40 },
@@ -240,14 +235,12 @@ export default function AboutUs() {
 
   return (
     <section id="about" ref={containerRef} className="relative bg-white text-black overflow-hidden" dir="rtl">
-      {/* ============ خلفية بلوبريت هندسية + حلقات دوّارة ============ */}
       <div className="absolute inset-0 pointer-events-none" data-parallax="0.3">
         <div className="absolute inset-0 blueprint-grid"></div>
       </div>
       <div className="absolute inset-0 pointer-events-none" data-parallax="-0.2">
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46rem] h-[46rem] rounded-full border-2 border-dashed border-black/[0.07] orbit-spin" style={{ ['--r']: '60s' }}></span>
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] rounded-full border border-black/[0.06] orbit-spin-rev" style={{ ['--r']: '80s' }}></span>
-        {/* حلقة دوّارة خفيفة (SVG) بدل conic-gradient — تركيب GPU بلا إعادة رسم */}
         <svg
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 orbit-spin overflow-visible"
           viewBox="0 0 384 384"
@@ -268,7 +261,6 @@ export default function AboutUs() {
         </svg>
       </div>
 
-      {/* ============ مجسمات طافية ============ */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ perspective: '1000px' }} data-parallax="0.55">
         {FLOATERS.map((f, i) => (
           <span key={i} className={`absolute ${f.pos} ${f.drift} ${f.hide ? 'hidden md:block' : ''}`}>
@@ -277,7 +269,6 @@ export default function AboutUs() {
         ))}
       </div>
 
-      {/* ============ غيوم لونية (أنيميشن CSS صرف + ضبابية مخفَّفة على الجوال) ============ */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true" data-parallax="0.4">
         <div
           className="blob-breath absolute -top-24 right-[-10%] w-[20rem] md:w-[36rem] h-[20rem] md:h-[36rem] bg-[#407BFF]/8 rounded-full reduce-blur"
@@ -293,7 +284,6 @@ export default function AboutUs() {
         ></div>
       </div>
 
-      {/* ============ 1) المقدمة المثبتة ============ */}
       <div ref={introRef} className="relative min-h-screen w-full flex items-center justify-center">
         <div className="max-w-6xl mx-auto px-6 w-full relative z-10 py-24 md:py-28">
           <div className="flex items-center gap-3 mb-7 md:mb-8">
@@ -360,7 +350,6 @@ export default function AboutUs() {
         </div>
       </div>
 
-      {/* ============ شريط منتجات متحرك ============ */}
       <div className="relative border-y-4 border-black bg-[#111] py-5 overflow-hidden">
         <div dir="ltr" className="t-marquee flex w-max select-none">
           {[...Array(2)].map((_, k) => (
@@ -385,7 +374,6 @@ export default function AboutUs() {
         </div>
       </div>
 
-      {/* ============ 2) كتالوج المنتجات Bento ============ */}
       <div className="relative max-w-6xl mx-auto px-6 pb-32 pt-24">
         <div className="flex items-end justify-between gap-4 mb-10 flex-wrap">
           <div>
@@ -413,7 +401,8 @@ export default function AboutUs() {
                 <div
                   onMouseMove={handleTiltMove}
                   onMouseLeave={handleTiltLeave}
-                  className="bento-card h-full group relative bg-white border-2 border-black p-7 transition-all duration-300 ease-out will-change-transform shadow-[6px_6px_0px_#000] hover:shadow-[10px_10px_0px_#000] overflow-hidden"
+                  {/* 🔥 تم إزالة will-change-transform من السطر التالي لمنع تعليق الجوال */}
+                  className="bento-card h-full group relative bg-white border-2 border-black p-7 transition-all duration-300 ease-out shadow-[6px_6px_0px_#000] hover:shadow-[10px_10px_0px_#000] overflow-hidden"
                 >
                   <div
                     className="pointer-events-none absolute inset-0 opacity-50 group-hover:opacity-100 transition-opacity duration-500"
@@ -447,7 +436,6 @@ export default function AboutUs() {
                     </div>
                     <p className="text-sm text-neutral-500 font-medium leading-relaxed mt-2">{c.desc}</p>
 
-                    {/* عيّنات منتجات داخل الكرت */}
                     <div className="mt-5 grid gap-2.5" style={{ gridTemplateColumns: `repeat(${Math.min(c.chips.length, 2)}, 1fr)` }}>
                       {c.chips.slice(0, 2).map((ch, j) => (
                         <div key={j} className="flex items-center justify-between border-2 border-black/10 bg-neutral-50 px-3 py-2.5 group-hover:border-black transition-colors">

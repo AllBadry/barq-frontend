@@ -13,40 +13,14 @@ import Contact from '../components/sections/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// 🔥 الإعداد الموحد لجميع الملفات يوضع هنا لمنع ارتباك المتصفح عند إخفاء شريط العنوان في الجوال
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 export default function Home() {
   const mainRef = useRef(null);
 
   useGSAP(() => {
-    const sections = gsap.utils.toArray('.cinematic-section');
-
-    sections.forEach((section, index) => {
-      if (index === 0) return;
-
-      // أنيميشن ظهور سلس ونظيف (Fade Up) بدون أي لاغ أو ثقل في السكرول
-      gsap.fromTo(section,
-        {
-          y: 50,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 85%',
-            toggleActions: 'play none none none', // يشتغل بسلاسة مرة واحدة عند الوصول إليه بدون ثقل الـ scrub
-          }
-        }
-      );
-    });
-  }, { scope: mainRef });
-
-  useGSAP(() => {
-    // ===== Parallax عام: عنصر ب data-parallax يتحرك عند السكرول =====
-    // يعمل على أجهزة الكمبيوتر فقط (شاشة واسعة + مؤشر دقيق) —
-    // على الهاتف/الايباد نعطّل حركة الخلفيات لتفادي تعلّق السكرول.
+    // ===== Parallax عام =====
     const desktop = window.matchMedia('(min-width: 1024px)').matches && window.matchMedia('(pointer: fine)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!desktop || reduce) return;
@@ -65,7 +39,7 @@ export default function Home() {
             trigger: el.closest('section') || el,
             start: 'top bottom',
             end: 'bottom top',
-            scrub: 0.6,
+            scrub: true, // 🔥 true تمنع اللاغ وثقل السكرول على أجهزة اللابتوب
           },
         }
       );
@@ -73,7 +47,6 @@ export default function Home() {
   }, { scope: mainRef });
 
   return (
-    // تم إضافة overflow-x-hidden لضمان عدم ظهور السكرول الأفقي نهائياً
     <main 
       ref={mainRef} 
       className="relative w-full bg-white min-h-screen overflow-x-hidden text-black selection:bg-[#e4f542]"
@@ -85,21 +58,22 @@ export default function Home() {
         path="/"
       />
 
-      <div className="cinematic-section">
+      {/* 🔥 تم إزالة كلاس cinematic-section لترك المكونات الداخلية تعمل بحرية وبدون تضارب */}
+      <div>
         <HeroSection />
       </div>
 
       <AboutUs />
 
-      <div className="cinematic-section">
+      <div>
         <Categories />
       </div>
 
-      <div className="cinematic-section">
+      <div>
         <Contact />
       </div>
 
-      <div className="cinematic-section">
+      <div>
         <Footer />
       </div>
       

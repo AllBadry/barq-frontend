@@ -2,15 +2,12 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { Send, MessageCircle, Mail, ArrowUpRight, Check } from 'lucide-react';
-import { FaTelegramPlane ,} from 'react-icons/fa';
+import { Send, MessageCircle, Mail, ArrowUpRight, Check, Loader2 } from 'lucide-react';
+import { FaTelegramPlane } from 'react-icons/fa';
 import { usePopup } from '../../context/usePopup';
 import { api } from '../../lib/api';
-import { Loader2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
-
-
 
 const CHANNELS = [
   {
@@ -26,7 +23,7 @@ const CHANNELS = [
     label: 'تيلغرام',
     value: '@BaarqStore',
     note: 'دعم مباشر عبر بوت التليغرام',
-    href: 't.me/BaarqStore',
+    href: 'https://t.me/BaarqStore', // 🔥 تم تصحيح الرابط هنا
     bg: '#229ED9',
   },
   {
@@ -48,14 +45,13 @@ const FLOATERS = [
 
 export default function Contact() {
   const HEAD_WORDS = ['خطك', 'المباشر', 'مع', 'برق'];
-const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [sent, setSent] = useState(false);
-const { showPopup } = usePopup();
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { showPopup } = usePopup();
   const containerRef = useRef(null);
-const [isLoading, setIsLoading] = useState(false);
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
@@ -90,7 +86,6 @@ const handleSubmit = async (e) => {
       setIsSubmitting(false);
     }
   };
-
 
   useGSAP(() => {
     gsap.fromTo(
@@ -178,7 +173,6 @@ const handleSubmit = async (e) => {
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-16 items-start">
-          {/* قنوات التواصل */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
             {CHANNELS.map((c, i) => {
               const Icon = c.icon;
@@ -205,7 +199,6 @@ const handleSubmit = async (e) => {
             })}
           </div>
 
-           {/* نموذج الاستعلام */}
             <div className="lg:col-span-7">
               <form
                 id="contact-form"

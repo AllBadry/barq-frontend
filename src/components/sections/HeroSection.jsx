@@ -6,8 +6,7 @@ import { Sparkles, Palette, Hexagon } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// 🔥 الحل الأول والأهم: منع GSAP من إعادة حساب المقاسات عند ظهور/اختفاء شريط عنوان Safari
-ScrollTrigger.config({ ignoreMobileResize: true });
+// 🔥 تم حذف ScrollTrigger.config من هنا لأننا نقلناه للملف الرئيسي Home.jsx
 
 export default function HeroSection() {
   const containerRef = useRef(null);
@@ -38,8 +37,7 @@ export default function HeroSection() {
       ease: 'power3.out',
     }, '-=0.8');
 
-    // 🔥 الحل الثاني: التعرف الدقيق على أجهزة اللمس (الآيفون والآيباد) 
-    // لمنع تأثير Scrub الثقيل الذي يتعارض مع السحب الطبيعي بالإصبع
+    // التعرف على أجهزة اللمس لمنع ثقل السكرول
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
     if (!isTouchDevice) {
@@ -48,7 +46,7 @@ export default function HeroSection() {
           trigger: containerRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: 1,
+          scrub: true, // 🔥 التعديل الأهم: تحويلها من 1 إلى true لإنهاء تعليق اللابتوب
         },
       })
         .to('.hero-text-layer', { y: 140, opacity: 0.3, ease: 'none', force3D: true }, 0)
