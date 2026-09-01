@@ -401,7 +401,6 @@ export default function AboutUs() {
                 <div
                   onMouseMove={handleTiltMove}
                   onMouseLeave={handleTiltLeave}
-                  {/* 🔥 تم إزالة will-change-transform من السطر التالي لمنع تعليق الجوال */}
                   className="bento-card h-full group relative bg-white border-2 border-black p-7 transition-all duration-300 ease-out shadow-[6px_6px_0px_#000] hover:shadow-[10px_10px_0px_#000] overflow-hidden"
                 >
                   <div
