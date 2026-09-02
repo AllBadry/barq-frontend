@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom'; // 👈 إضافة هذا لالتقاط الهاش
+import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X, Loader2 } from 'lucide-react';
+// 🔥 التعديل الأول: استدعاء أيقونة MonitorPlay للاشتراكات، و Package كاحتياطي
+import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X, Loader2, MonitorPlay, Package } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 
 import Navbar from '../components/layouts/Navbar';
@@ -16,10 +17,13 @@ import { api } from '../lib/api';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// 🔥 التعديل الثاني: إضافة الأيقونات الجديدة للقاموس ليتعرف عليها الفرونت إند
 const ICON_MAP = {
   FaInstagram: FaInstagram,
   FaFacebookF: FaFacebookF,
-  FaTiktok: FaTiktok
+  FaTiktok: FaTiktok,
+  MonitorPlay: MonitorPlay,
+  Package: Package
 };
 
 // ==========================================
@@ -169,8 +173,14 @@ function TierRow({ p, g, gi }) {
                   {it.qty}
                 </p>
               </div>
+              
+              {/* 🔥 التعديل الثالث: عرض اللوغو الذكي (نتفليكس/كانفا) إن وجد، أو الأيقونة العادية */}
               <div className="w-10 h-10 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000] transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${p.color}, ${p.dark})` }}>
-                <Icon className="w-4 h-4" />
+                {g.logo && g.logo !== '/logos/default.png' ? (
+                  <img src={g.logo} alt={g.cat} className="w-6 h-6 object-contain group-hover:-rotate-45 transition-transform duration-300 drop-shadow-md" />
+                ) : (
+                  <Icon className="w-5 h-5" />
+                )}
               </div>
             </div>
 
@@ -196,12 +206,11 @@ function TierRow({ p, g, gi }) {
 // ==========================================
 function LazyPlatform({ p, index, setActive, initialVisible }) {
   const sectionRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(initialVisible); // 👈 تحميل القسم فوراً إذا كان الهدف هو الـ Hash الخاص به
+  const [isVisible, setIsVisible] = useState(initialVisible); 
   const Icon = p.Icon;
 
-  // 1. مراقبة اقتراب المستخدم من القسم
   useEffect(() => {
-    if (isVisible) return; // لا تراقب إذا كان مرئياً بالفعل
+    if (isVisible) return; 
 
     const observer = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting) {
@@ -215,7 +224,6 @@ function LazyPlatform({ p, index, setActive, initialVisible }) {
     return () => observer.disconnect();
   }, [isVisible]);
 
-  // 2. تطبيق GSAP الخاص بالمنصة فقط عند ظهورها
   useGSAP(() => {
     if (!isVisible) return; 
 
@@ -320,7 +328,7 @@ function LazyPlatform({ p, index, setActive, initialVisible }) {
 // 4. المكون الرئيسي (Products Page)
 // ==========================================
 export default function Products() {
-  const location = useLocation(); // 👈 لالتقاط الهاش من الـ URL
+  const location = useLocation(); 
   const mainRef = useRef(null);
   const [active, setActive] = useState(0);
   const [platforms, setPlatforms] = useState([]);
@@ -343,22 +351,19 @@ export default function Products() {
     fetchStorefrontData();
   }, []);
 
-  // 👈 التأكد من التمرير للهاش المطلوب بعد اكتمال جلب البيانات
   useEffect(() => {
     if (!loading && platforms.length > 0 && location.hash) {
       setTimeout(() => {
         const targetElement = document.querySelector(location.hash);
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // تحديث العنصر النشط بناءً على الهاش
           const index = platforms.findIndex(p => `#platform-${p.id}` === location.hash);
           if (index !== -1) setActive(index);
         }
-      }, 300); // تأخير بسيط جداً للتأكد من ريندر العناصر
+      }, 300);
     }
   }, [loading, platforms, location.hash]);
 
-  // أنيميشن الـ Hero يعمل مرة واحدة عند تحميل الصفحة
   useGSAP(() => {
     if (loading || platforms.length === 0) return;
 
@@ -453,7 +458,6 @@ export default function Products() {
       </div>
 
       {platforms.map((p, i) => {
-        // 👈 تمرير خاصية أن القسم مرئي افتراضياً إذا كان الهاش يطابقه
         const isTargetSection = location.hash === `#platform-${p.id}`;
         return (
           <LazyPlatform 
@@ -461,7 +465,7 @@ export default function Products() {
             p={p} 
             index={i} 
             setActive={setActive} 
-            initialVisible={isTargetSection} // جعل القسم المستهدف مرئياً قبل الوصول إليه
+            initialVisible={isTargetSection} 
           />
         );
       })}
