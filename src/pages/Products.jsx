@@ -176,12 +176,12 @@ function TierRow({ p, g, gi }) {
               
               {/* 🔥 التعديل الثالث: عرض اللوغو الذكي (نتفليكس/كانفا) إن وجد، أو الأيقونة العادية */}
               <div className="w-10 h-10 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000] transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${p.color}, ${p.dark})` }}>
-                {g.logo && g.logo !== '/logos/default.png' ? (
-                  <img src={g.logo} alt={g.cat} className="w-6 h-6 object-contain group-hover:-rotate-45 transition-transform duration-300 drop-shadow-md" />
-                ) : (
-                  <Icon className="w-5 h-5" />
-                )}
-              </div>
+  {g.logo && g.logo !== '/logos/default.png' ? (
+    <img src={g.logo} alt={g.cat} className="w-6 h-6 object-contain group-hover:-rotate-45 transition-transform duration-300 drop-shadow-md" />
+  ) : (
+    <Icon className="w-5 h-5" />
+  )}
+</div>
             </div>
 
             <div className="mt-5 pt-4 border-t-2 border-black/10 flex items-end justify-between gap-3">
