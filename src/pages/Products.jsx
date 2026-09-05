@@ -25,9 +25,6 @@ const ICON_MAP = {
 };
 
 // ==========================================
-// 1. مكون زر الإضافة والبوب-أب (تم دعمه للإضافة المباشرة)
-// ==========================================
-// ==========================================
 // 1. مكون زر الإضافة والبوب-أب (ديناميكي: رابط أو إيميل)
 // ==========================================
 function AddToCartButton({ p, g, item }) {
@@ -45,7 +42,7 @@ function AddToCartButton({ p, g, item }) {
   const inputLabel = isSubscription ? "البريد الإلكتروني المراد تفعيله" : guide.label;
   const inputPlaceholder = isSubscription ? "example@gmail.com" : guide.placeholder;
   const inputHint = isSubscription 
-    ? "سيتم إرسال رابط التفعيل أو بيانات الحساب إلى هذا البريد." 
+    ? "تنبيه هام: سيتم التفعيل على الحساب المسجل به حالياً عند ضغطك على الرابط المرسل لهذا البريد." 
     : guide.hint;
 
   const confirm = () => {
@@ -116,9 +113,12 @@ function AddToCartButton({ p, g, item }) {
                 className="mt-1.5 w-full bg-white text-black placeholder:text-neutral-400 border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-shadow"
               />
               
-              <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">
-                {inputHint}
-              </p>
+              {/* رسالة التنبيه بتصميم مميز */}
+              <div className="mt-2 flex items-start gap-1.5 bg-[#e4f542]/20 border border-[#e4f542] p-2 rounded text-[11px] font-bold text-neutral-700 leading-relaxed">
+                <span className="shrink-0 pt-0.5 text-[#a3b118]">💡</span>
+                <p>{inputHint}</p>
+              </div>
+              
               {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
               
               <div className="mt-6 flex gap-3">
