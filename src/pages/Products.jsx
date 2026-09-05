@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-// 🔥 التعديل الأول: استدعاء أيقونة MonitorPlay للاشتراكات، و Package كاحتياطي
 import { ArrowDown, Zap, ShieldCheck, ShoppingCart, Check, X, Loader2, MonitorPlay, Package } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 
@@ -17,7 +16,6 @@ import { api } from '../lib/api';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// 🔥 التعديل الثاني: إضافة الأيقونات الجديدة للقاموس ليتعرف عليها الفرونت إند
 const ICON_MAP = {
   FaInstagram: FaInstagram,
   FaFacebookF: FaFacebookF,
@@ -27,7 +25,10 @@ const ICON_MAP = {
 };
 
 // ==========================================
-// 1. مكون زر الإضافة والبوب-أب 
+// 1. مكون زر الإضافة والبوب-أب (تم دعمه للإضافة المباشرة)
+// ==========================================
+// ==========================================
+// 1. مكون زر الإضافة والبوب-أب (ديناميكي: رابط أو إيميل)
 // ==========================================
 function AddToCartButton({ p, g, item }) {
   const { add } = useCart();
@@ -37,12 +38,29 @@ function AddToCartButton({ p, g, item }) {
   const [err, setErr] = useState('');
   const guide = linkGuide(g);
 
+  // 🔥 تحديد نوع المنتج بناءً على خاصية requiresLink
+  const isSubscription = item.requiresLink === false;
+
+  // تغيير النصوص ديناميكياً
+  const inputLabel = isSubscription ? "البريد الإلكتروني المراد تفعيله" : guide.label;
+  const inputPlaceholder = isSubscription ? "example@gmail.com" : guide.placeholder;
+  const inputHint = isSubscription 
+    ? "سيتم إرسال رابط التفعيل أو بيانات الحساب إلى هذا البريد." 
+    : guide.hint;
+
   const confirm = () => {
     const v = link.trim();
     if (!v) {
-      setErr(`الرجاء إدخال ${guide.label}`);
+      setErr(isSubscription ? "الرجاء إدخال البريد الإلكتروني" : `الرجاء إدخال ${guide.label}`);
       return;
     }
+
+    // فحص صيغة الإيميل إذا كان المنتج اشتراكاً
+    if (isSubscription && !/^\S+@\S+\.\S+$/.test(v)) {
+      setErr("صيغة البريد الإلكتروني غير صحيحة، يرجى التأكد منها.");
+      return;
+    }
+
     add(cartItem(p, g, item, v));
     setShow(false);
     setLink('');
@@ -57,7 +75,7 @@ function AddToCartButton({ p, g, item }) {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setShow(true);
+          setShow(true); // نظهر النافذة دائماً الآن
         }}
         aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
         className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider px-4 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000] transition-all duration-200 ${
@@ -83,18 +101,23 @@ function AddToCartButton({ p, g, item }) {
                 {g.sub ? ` (${g.sub})` : ''}
               </p>
               
+              {/* النصوص المتغيرة */}
               <label className="mt-5 block text-[11px] font-black uppercase tracking-widest text-neutral-600">
-                {guide.label}
+                {inputLabel}
               </label>
               
               <input
-                value={link} onChange={(e) => { setLink(e.target.value); setErr(''); }}
-                dir="ltr" autoFocus placeholder={guide.placeholder}
+                type={isSubscription ? "email" : "text"}
+                value={link} 
+                onChange={(e) => { setLink(e.target.value); setErr(''); }}
+                dir="ltr" 
+                autoFocus 
+                placeholder={inputPlaceholder}
                 className="mt-1.5 w-full bg-white text-black placeholder:text-neutral-400 border-2 border-black px-4 py-3.5 text-sm font-bold outline-none focus:shadow-[4px_4px_0px_#0ea5e9] transition-shadow"
               />
               
               <p className="mt-2 text-[11px] font-bold text-neutral-500 leading-relaxed">
-                {guide.hint}
+                {inputHint}
               </p>
               {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
               
@@ -174,7 +197,6 @@ function TierRow({ p, g, gi }) {
                 </p>
               </div>
               
-              {/* 🔥 التعديل الثالث: عرض اللوغو الذكي (نتفليكس/كانفا) إن وجد، أو الأيقونة العادية */}
               <div className="w-10 h-10 rounded-lg border-2 border-black flex items-center justify-center text-white shadow-[2px_2px_0px_#000] transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${p.color}, ${p.dark})` }}>
                 {g.logo && g.logo !== '/logos/default.png' ? (
                   <img src={g.logo} alt={g.cat} className="w-6 h-6 object-contain group-hover:-rotate-45 transition-transform duration-300 drop-shadow-md" />
@@ -202,7 +224,7 @@ function TierRow({ p, g, gi }) {
 }
 
 // ==========================================
-// 🔥 3. مكون الـ Lazy Loading (غلاف ذكي للمنصة)
+// 3. مكون الـ Lazy Loading (غلاف ذكي للمنصة)
 // ==========================================
 function LazyPlatform({ p, index, setActive, initialVisible }) {
   const sectionRef = useRef(null);

@@ -12,12 +12,29 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
   const [err, setErr] = useState('');
   const guide = linkGuide(g);
 
+  // 🔥 تحديد نوع المنتج بناءً على خاصية requiresLink
+  const isSubscription = item.requiresLink === false;
+
+  // تغيير النصوص ديناميكياً
+  const inputLabel = isSubscription ? "البريد الإلكتروني المراد تفعيله" : guide.label;
+  const inputPlaceholder = isSubscription ? "example@gmail.com" : guide.placeholder;
+  const inputHint = isSubscription 
+    ? "سيتم إرسال رابط التفعيل أو بيانات الحساب إلى هذا البريد." 
+    : guide.hint;
+
   const confirm = () => {
     const v = link.trim();
     if (!v) {
-      setErr(`الرجاء إدخال ${guide.label}`);
+      setErr(isSubscription ? "الرجاء إدخال البريد الإلكتروني" : `الرجاء إدخال ${guide.label}`);
       return;
     }
+
+    // فحص الإيميل إذا كان اشتراكاً
+    if (isSubscription && !/^\S+@\S+\.\S+$/.test(v)) {
+      setErr("صيغة البريد الإلكتروني غير صحيحة، يرجى التأكد منها.");
+      return;
+    }
+
     add(cartItem(p, g, item, v));
     setShow(false);
     setLink('');
@@ -31,7 +48,7 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        setShow(true);
+        setShow(true); // النافذة ستظهر دائماً ولكن بمحتوى متغير (إيميل أو رابط)
       }}
       aria-label={done ? 'أُضيف إلى السلة' : 'أضِف إلى السلة'}
       className={
@@ -57,6 +74,7 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
           <div
             className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4"
             onClick={() => setShow(false)}
+            dir="rtl"
           >
             <div
               className="w-full max-w-md bg-white border-2 border-black shadow-[10px_10px_0px_#000] p-6"
@@ -67,10 +85,13 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
                 {item.qty} {g.cat} — {p.name}
                 {g.sub ? ` (${g.sub})` : ''}
               </p>
+              
               <label className="mt-4 block text-[11px] font-black uppercase tracking-widest text-neutral-900">
-                {guide.label}
+                {inputLabel}
               </label>
+              
               <input
+                type={isSubscription ? "email" : "text"}
                 value={link}
                 onChange={(e) => {
                   setLink(e.target.value);
@@ -78,15 +99,17 @@ export default function AddToCartButton({ p, g, item, compact = false }) {
                 }}
                 dir="ltr"
                 autoFocus
-                placeholder={guide.placeholder}
+                placeholder={inputPlaceholder}
                 className="mt-1 w-full bg-white border-2 border-black px-4 py-3.5 text-sm font-bold outline-none placeholder:text-neutral-600 focus:shadow-[4px_4px_0px_#000]"
               />
-              <p className="mt-2 text-[11px] font-bold text-neutral-800 leading-relaxed">{guide.hint}</p>
+              
+              <p className="mt-2 text-[11px] font-bold text-neutral-800 leading-relaxed">{inputHint}</p>
               {err && <p className="mt-2 text-xs font-black text-red-600">{err}</p>}
+              
               <div className="mt-5 flex gap-3">
                 <button
                   onClick={confirm}
-                  className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-[#407BFF] transition-colors"
+                  className="flex-1 bg-black text-white text-sm font-black uppercase tracking-widest py-3 border-2 border-black hover:bg-[#e4f542] hover:text-black transition-colors shadow-[3px_3px_0px_#000]"
                 >
                   إضافة للسلة
                 </button>
