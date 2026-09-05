@@ -238,7 +238,9 @@ export const cartItem = (p, g, item, link = '') => {
   const gi = p.groups.indexOf(g);
   const ii = g.items.indexOf(item);
   return {
-    key: `${p.id}__${gi}__${ii}__${link}`,
+    key: `${item.id || p.id}__${gi}__${ii}__${link}`,
+    id: item.id || null,               // 🆔 المُعرّف الحقيقي للمنتج من قاعدة البيانات
+    productId: item.id || null,
     platformId: p.id,
     platformName: p.name,
     en: p.en,

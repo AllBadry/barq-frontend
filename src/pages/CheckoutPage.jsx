@@ -45,6 +45,7 @@ export default function CheckoutPage() {
     const targetLink = items.map((it) => it.link.trim()).find(Boolean);
 
     const orderItems = items.map((it) => ({
+      productId: it.id || it.productId || null,
       name: `${it.qty} ${it.cat} — ${it.platformName}${it.sub ? ` (${it.sub})` : ''}`,
       price: parseFloat(it.price),
       quantity: it.count,

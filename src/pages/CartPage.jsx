@@ -98,8 +98,8 @@ export default function CartPage() {
     try {
       const orderData = {
         items: items.map(it => ({
-          productId: it.productId,
-          name: `${it.qty} ${it.cat} - ${it.platformName}`,
+          productId: it.id || it.productId || null,
+          name: `${it.qty} ${it.cat} - ${it.platformName}${it.sub ? ` (${it.sub})` : ''}`,
           price: it.price,
           quantity: it.count,
           link: it.link
