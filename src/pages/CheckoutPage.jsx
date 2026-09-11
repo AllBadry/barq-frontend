@@ -89,7 +89,7 @@ export default function CheckoutPage() {
             <h2 className="mt-4 text-2xl font-black">تم استلام طلبك ✅</h2>
             <p className="mt-2 text-sm font-bold text-neutral-500">رقم الطلب: #{String(done._id).slice(-6)}</p>
             <p className="mt-3 text-sm font-bold text-neutral-600">
-              تحقق من إيميلك لتفاصيل التحويل البنكي (بنك الاتحاد). بعد التحويل ارفع الإيصال من صفحة بروفايلك.
+              تحقق من إيميلك لتفاصيل التحويل (أورنج موني). بعد التحويل ارفع الإيصال من صفحة بروفايلك.
             </p>
             <Link to="/profile" className="mt-6 inline-block bg-black text-white px-6 py-3 border-2 border-black hover:bg-[#407BFF]">الذهاب لبروفايلي</Link>
           </div>
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-4 border-2 border-[#25D366] bg-[#f0fff5] p-3 text-xs font-bold text-neutral-700 leading-relaxed">
-                🏦 الدفع عبر تحويل بنكي — بنك الاتحاد. ستصلك تفاصيل الحساب على بريدك فوراً.
+                🏦 الدفع عبر أورنج موني (Orange Money). ستصلك تفاصيل التحويل على بريدك فوراً.
               </div>
 
               {error && <p className="mt-3 text-xs font-black text-red-600">{error}</p>}
@@ -139,7 +139,7 @@ export default function CheckoutPage() {
                 disabled={busy}
                 className="mt-4 w-full flex items-center justify-center gap-2 bg-[#25D366] text-black text-sm font-black uppercase tracking-widest py-4 border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#1db954] hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition-all disabled:opacity-60"
               >
-                {busy ? 'جارٍ الإنشاء…' : 'إنشاء الطلب وتحويل البنك'}
+                {busy ? 'جارٍ الإنشاء…' : 'إنشاء الطلب وإتمام الدفع'}
               </button>
 
             </aside>

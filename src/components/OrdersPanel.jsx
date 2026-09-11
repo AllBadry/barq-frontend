@@ -116,7 +116,7 @@ export default function OrdersPanel() {
     e.preventDefault();
     if (!uploadData.file) {
       // استخدام النظام العالمي للتنبيه
-      showPopup({ type: 'warning', title: 'تنبيه', text: 'الرجاء اختيار صورة حوالة كليك (CliQ) أولاً.' });
+      showPopup({ type: 'warning', title: 'تنبيه', text: 'الرجاء اختيار صورة حوالة أورنج موني (Orange Money) أولاً.' });
       return;
     }
 
@@ -245,20 +245,20 @@ export default function OrdersPanel() {
 
             <h3 className="text-2xl font-black tracking-tighter mb-2">إتمام الدفع</h3>
             <p className="text-xs font-bold text-neutral-500 mb-2 leading-relaxed">
-              يرجى إرفاق صورة لحوالة كليك (CliQ) لإتمام الطلب.
+              يرجى إرفاق صورة لحوالة أورنج موني (Orange Money) لإتمام الطلب.
             </p>
             <div className="space-y-2 text-sm font-bold text-neutral-800 bg-neutral-50 p-4 border-2 border-black shadow-[3px_3px_0px_#000]">
   <div className="flex items-center justify-between">
     <span className="text-neutral-500 text-xs font-mono uppercase">جهة التحويل</span>
-    <span className="font-black text-black">بنك الاتحاد</span>
+    <span className="font-black text-[#808367]">اورنج موني</span>
   </div>
   <div className="flex items-center justify-between">
     <span className="text-neutral-500 text-xs font-mono uppercase">اسم المستفيد</span>
-    <span className="font-black text-black">علاء السكسك</span>
+    <span className="font-black text-black">علاء السكسك <span dir="ltr" className="text-xs text-neutral-500">(ALA ALSIKSEK)</span></span>
   </div>
   <div className="flex items-center justify-between pt-2 border-t border-black/10">
-    <span className="text-neutral-500 text-xs font-mono uppercase">معرف كليك (CliQ)</span>
-    <span className="font-mono font-black bg-black text-[#e4f542] px-2 py-0.5 tracking-widest text-sm" dir="ltr">SIK12</span>
+    <span className="text-neutral-500 text-xs font-mono uppercase">معرف الدفع (Alias)</span>
+    <span className="font-mono font-black bg-black text-[#e4f542] px-2 py-0.5 tracking-widest text-sm" dir="ltr">BARQSTORE</span>
   </div>
 </div>
             <ReceiptForm
